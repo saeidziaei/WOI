@@ -28865,78 +28865,135 @@ var ReactDOM = require('react-dom');
 $(document).ready(function () {
 	ReactDOM.render(React.createElement(CustomerLookup, null), $('#customer-lookup-container')[0]);
 });
+var CustomerBox = React.createClass({
+	displayName: 'CustomerBox',
 
+	render: function () {
+		var customer = this.props.data;
+		return React.createElement(
+			'div',
+			{ className: 'col-xs-6 col-sm-3 customer-box', onClick: this.boxClicked },
+			React.createElement(
+				'div',
+				{ className: 'thumbnail' },
+				React.createElement(
+					'div',
+					{ className: 'caption' },
+					React.createElement(
+						'h3',
+						null,
+						customer.name.first,
+						' ',
+						customer.name.last
+					),
+					React.createElement(
+						'p',
+						null,
+						customer.phone
+					),
+					React.createElement(
+						'p',
+						null,
+						customer.billingAddress
+					)
+				)
+			)
+		);
+	},
+	boxClicked: function (e) {
+		if (this.props.onSelect) this.props.onSelect(this.props.data);
+	}
+});
 var CustomerBoxList = React.createClass({
 	displayName: 'CustomerBoxList',
 
 	render: function () {
 		var list = this.props.data.map(function (item) {
-			return React.createElement(
-				'div',
-				{ key: item._id },
-				item.name.first,
-				' - ',
-				item.name.last
-			);
-		});
+			return React.createElement(CustomerBox, { onSelect: this.customerSelected, key: item._id, data: item });
+		}.bind(this));
 		return React.createElement(
 			'div',
-			{ className: 'customer-box-list' },
+			{ className: 'customer-box-list row margin-top' },
 			list
 		);
+	},
+	customerSelected: function (customer) {
+		this.props.onSelect(customer);
 	}
 });
 var CustomerLookup = React.createClass({
 	displayName: 'CustomerLookup',
 
 	render: function () {
-		var msg = this.state.existingCustomerSelected ? React.createElement(
-			'span',
-			{ className: 'existing-customer' },
-			'Existing Customer!'
+		// var msg = this.state.existingCustomerSelected ? <span className='existing-customer'>Existing Customer!</span> : null;
+		var c = this.state.selectedCustomer;
+		var customerBox = c ? React.createElement(
+			'div',
+			null,
+			' ',
+			React.createElement(CustomerBox, { key: c._id, data: c }),
+			React.createElement(
+				'div',
+				{ className: 'btn btn-primary', onClick: this.changeSelection },
+				'Change'
+			)
 		) : null;
-		var matchedCustomersList = null;
+
 		var custdata = this.state.custdata;
+		var matchedCustomers = null;
 		if (custdata && custdata.length) {
-			matchedCustomersList = React.createElement(CustomerBoxList, { data: custdata });
+			matchedCustomers = React.createElement(CustomerBoxList, { data: custdata, onSelect: this.customerSelected });
 		}
+
+		var newCustomerControls = !c ? React.createElement(
+			'div',
+			{ className: 'row' },
+			React.createElement(
+				'div',
+				{ className: 'col-sm-6 col-xs-12' },
+				React.createElement('input', { name: 'lookup-name', onChange: this.nameChanged, placeholder: 'Name', className: 'form-control' })
+			),
+			React.createElement(
+				'div',
+				{ className: 'col-sm-6 col-xs-12' },
+				React.createElement('input', { name: 'lookup-phone', placeholder: 'Phone', className: 'form-control' })
+			)
+		) : null;
+
 		return React.createElement(
 			'div',
 			null,
-			msg,
-			React.createElement(
-				'div',
-				{ className: 'row' },
-				React.createElement(
-					'div',
-					{ className: 'col-sm-6 col-xs-12' },
-					React.createElement('input', { name: 'lookup-name', onChange: this.nameChanged, placeholder: 'Name', className: 'form-control' })
-				),
-				React.createElement(
-					'div',
-					{ className: 'col-sm-6 col-xs-12' },
-					React.createElement('input', { name: 'lookup-phone', placeholder: 'Phone', className: 'form-control' })
-				)
-			),
-			matchedCustomersList
+			customerBox,
+			newCustomerControls,
+			matchedCustomers
 		);
 	},
 	getInitialState: function () {
 		return {
-			existingCustomerSelected: false,
-			custdata: null
+			custdata: null,
+			selectedCustomer: null
 		};
 	},
 	nameChanged: function (e) {
 		var token = e.target.value;
 		if (token) {
-			$.get('/cusdata/' + token, function (result) {
-				console.log("custdata", result);
+			$.get('/custdata/' + token, function (result) {
 				this.setState({
 					custdata: result.customers
 				});
 			}.bind(this));
 		}
+	},
+	customerSelected: function (customer) {
+		this.setState({
+			selectedCustomer: customer,
+			custdata: null // customer get picked!, no need to keep the list of matched records
+		});
+	},
+	changeSelection: function () {
+		this.setState({
+			selectedCustomer: null
+		});
 	}
 });
 

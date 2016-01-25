@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "node keystone.js",
-	"build": "browserify -t [ babelify --presets [ react ] ] ./public/js/quote.js -o ./public/js/bundle.js -v"
+	"build": "browserify -t [ babelify --presets [ react ] ] ./public/js/quote.jsx -o ./public/js/bundle.js -v"
   },
   "main": "keystone.js"
 }
