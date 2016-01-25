@@ -9,7 +9,7 @@ $(document).ready(function(){
 );
 
 })
-
+// test git
 var CustomerBoxList = React.createClass({
 	render: function(){
 		var list = this.props.data.map(function(item){
