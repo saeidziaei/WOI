@@ -28872,7 +28872,7 @@ var CustomerBox = React.createClass({
 		var customer = this.props.data;
 		return React.createElement(
 			'div',
-			{ className: 'col-xs-6 col-sm-3 customer-box', onClick: this.boxClicked },
+			{ className: 'col-xs-12 col-sm-6 col-md-4 customer-box', onClick: this.boxClicked },
 			React.createElement(
 				'div',
 				{ className: 'thumbnail' },
@@ -28882,6 +28882,8 @@ var CustomerBox = React.createClass({
 					React.createElement(
 						'h3',
 						null,
+						React.createElement('span', { className: 'glyphicon glyphicon-user' }),
+						' ',
 						customer.name.first,
 						' ',
 						customer.name.last
@@ -28890,6 +28892,11 @@ var CustomerBox = React.createClass({
 						'p',
 						null,
 						customer.phone
+					),
+					React.createElement(
+						'p',
+						null,
+						customer.email
 					),
 					React.createElement(
 						'p',
@@ -28931,10 +28938,10 @@ var CustomerLookup = React.createClass({
 			'div',
 			null,
 			' ',
-			React.createElement(CustomerBox, { key: c._id, data: c }),
+			React.createElement(CustomerBox, { key: c._id, data: c, onSelect: this.changeSelection }),
 			React.createElement(
 				'div',
-				{ className: 'btn btn-primary', onClick: this.changeSelection },
+				{ className: 'btn btn-default', onClick: this.changeSelection },
 				'Change'
 			)
 		) : null;
@@ -28944,19 +28951,67 @@ var CustomerLookup = React.createClass({
 		if (custdata && custdata.length) {
 			matchedCustomers = React.createElement(CustomerBoxList, { data: custdata, onSelect: this.customerSelected });
 		}
-
+		var newCustomer = this.state.newCustomer;
+		var newCustomerExtraControls = !c && newCustomer.name && (newCustomer.phone || newCustomer.email) ? React.createElement(
+			'div',
+			null,
+			React.createElement(
+				'div',
+				{ className: 'row margin-top' },
+				React.createElement(
+					'div',
+					{ className: 'col-sm-12 col-xs-12' },
+					React.createElement('textarea', { rows: '4', className: 'form-control', placeholder: 'Address' })
+				)
+			),
+			React.createElement(
+				'div',
+				{ className: 'alert alert-success margin-top-sm' },
+				'New ',
+				React.createElement(
+					'strong',
+					null,
+					'customer'
+				),
+				' will be created.'
+			)
+		) : null;
 		var newCustomerControls = !c ? React.createElement(
 			'div',
 			{ className: 'row' },
 			React.createElement(
 				'div',
-				{ className: 'col-sm-6 col-xs-12' },
-				React.createElement('input', { name: 'lookup-name', onChange: this.nameChanged, placeholder: 'Name', className: 'form-control' })
+				{ className: 'col-sm-4 col-xs-12' },
+				React.createElement('input', { name: 'lookup-name', onChange: this.nameChanged, value: this.state.newCustomer.name, placeholder: 'Name', className: 'form-control margin-top-sm' })
 			),
 			React.createElement(
 				'div',
-				{ className: 'col-sm-6 col-xs-12' },
-				React.createElement('input', { name: 'lookup-phone', placeholder: 'Phone', className: 'form-control' })
+				{ className: 'col-sm-4 col-xs-12' },
+				React.createElement(
+					'div',
+					{ className: 'input-group margin-top-sm' },
+					React.createElement(
+						'div',
+						{ className: 'input-group-addon' },
+						React.createElement('span', { className: 'glyphicon glyphicon-earphone' }),
+						' '
+					),
+					React.createElement('input', { name: 'customer-phone', type: 'text', onChange: this.phoneChanged, value: this.state.newCustomer.phone, className: 'form-control', placeholder: 'Phone' })
+				)
+			),
+			React.createElement(
+				'div',
+				{ className: 'col-sm-4 col-xs-12' },
+				React.createElement(
+					'div',
+					{ className: 'input-group margin-top-sm' },
+					React.createElement(
+						'span',
+						{ className: 'input-group-addon' },
+						'@'
+					),
+					React.createElement('input', { name: 'customer-email', type: 'text', onChange: this.emailChanged, value: this.state.newCustomer.email, className: 'form-control', placeholder: 'Email' })
+				)
 			)
 		) : null;
 
@@ -28965,19 +29020,42 @@ var CustomerLookup = React.createClass({
 			null,
 			customerBox,
 			newCustomerControls,
+			newCustomerExtraControls,
 			matchedCustomers
 		);
 	},
 	getInitialState: function () {
 		return {
 			custdata: null,
-			selectedCustomer: null
+			custdataTemp: null,
+			selectedCustomer: null,
+			newCustomer: { name: "", email: "", phone: "" }
 		};
 	},
 	nameChanged: function (e) {
-		var token = e.target.value;
-		if (token) {
-			$.get('/custdata/' + token, function (result) {
+		var name = e.target.value;
+		var newCustomer = this.state.newCustomer;
+		newCustomer.name = name;
+		this.setState({ newCustomer: newCustomer });
+		this.search(newCustomer);
+	},
+	phoneChanged: function (e) {
+		var phone = e.target.value;
+		var newCustomer = this.state.newCustomer;
+		newCustomer.phone = phone;
+		this.setState({ newCustomer: newCustomer });
+		this.search(newCustomer);
+	},
+	emailChanged: function (e) {
+		var email = e.target.value;
+		var newCustomer = this.state.newCustomer;
+		newCustomer.email = email;
+		this.setState({ newCustomer: newCustomer });
+		this.search(newCustomer);
+	},
+	search: function (c) {
+		if (c.name || c.phone || c.email) {
+			$.get('/custdata?name=' + c.name + '&phone=' + c.phone + '&email=' + c.email, function (result) {
 				this.setState({
 					custdata: result.customers
 				});
@@ -28985,14 +29063,17 @@ var CustomerLookup = React.createClass({
 		}
 	},
 	customerSelected: function (customer) {
+		var custdata = this.state.custdata;
 		this.setState({
 			selectedCustomer: customer,
-			custdata: null // customer get picked!, no need to keep the list of matched records
+			custdata: null, // customer get picked!, no need to keep the list of matched records
+			custdataTemp: custdata // in case the user changes mind
 		});
 	},
 	changeSelection: function () {
 		this.setState({
-			selectedCustomer: null
+			selectedCustomer: null,
+			custdata: this.state.custdataTemp
 		});
 	}
 });
