@@ -1,0 +1,30 @@
+extends ../layouts/default
+
+block intro
+	.container
+		h1 Quote
+		
+block content
+	.container
+		.search-customer.panel.panel-default
+			.panel-heading Lookup Customer
+			.panel-body
+				#customer-lookup-container
+
+		if submitted
+			h3 Quote Successfully Saved.
+		else
+			.row: .col-sm-8.col-md-6
+				form(method='post')
+					input(type='hidden', name='action', value='quote')
+					.form-group(class=validationErrors.description ? 'has-error' : null)
+						label Description of service
+						textarea(name='description', value=formData['description']).form-control
+					.form-group(class=validationErrors.items ? 'has-error' : null)
+						label Service items
+						///input(type='checkbox', name='items.upgrade', value=formData.items.upgrade).form-control
+
+					.form-actions
+						button(type='submit').btn.btn-primary Save
+block js
+	script(src='/js/bundle.js')
