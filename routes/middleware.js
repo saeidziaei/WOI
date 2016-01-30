@@ -71,3 +71,19 @@ exports.requireUser = function(req, res, next) {
 	}
 	
 };
+
+exports.requireStaff = function(req, res, next) {
+	var user = req.user;
+	if (!user) {
+		req.flash('error', 'Please sign in to access this page.');
+		res.redirect('/keystone/signin');
+	} else {
+		if (user.isManager || user.isOperator){
+			next();
+		} else {
+			req.flash('error', 'You do not have permission.');
+			res.redirect('/');
+		}
+	}
+	
+};

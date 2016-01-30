@@ -10,11 +10,21 @@ var User = new keystone.List('User');
 
 User.add({
 	name: { type: Types.Name, required: true, index: true },
-	email: { type: Types.Email, initial: true, required: true, index: true },
+	email: { type: Types.Email, initial: true, index: true },
+	phone: {type: String},
 	password: { type: Types.Password, initial: true, required: true }
 }, 'Permissions', {
-	isAdmin: { type: Boolean, label: 'Can access Keystone', index: true }
-});
+	isAdmin: { type: Boolean, label: 'Admin', index: true },
+	isManager: { type: Boolean, label: 'Manager/ Owner' },
+	isOperator: { type: Boolean, label: 'Operator' },
+	isCustomer: { type: Boolean, label: 'Customer' },
+},
+	'Customer', {
+		billingAddress: {type: String},
+		shippingAddress: {type: String},
+		company: {type: String}
+	}
+);
 
 // Provide access to Keystone
 User.schema.virtual('canAccessKeystone').get(function() {
@@ -26,8 +36,7 @@ User.schema.virtual('canAccessKeystone').get(function() {
  * Relationships
  */
 
-User.relationship({ ref: 'Post', path: 'posts', refPath: 'author' });
-
+User.relationship({ ref: 'WorkOrder', path: 'workOrders', refPath: 'customer' });
 
 /**
  * Registration

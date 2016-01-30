@@ -8,9 +8,15 @@
 	min-height: 200px;
 }
 .customer-box .thumbnail:hover{
-	background-color: lightblue;
+	background-color: #eee;
 	cursor: pointer;
 }
 .input-group{
 	margin-top: 5px;
+}
+.customer-box-selected .thumbnail{
+	border:1px black solid;
+}
+.margin-text{
+	margin: 5px;
 }

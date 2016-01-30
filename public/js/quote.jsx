@@ -1,156 +1,84 @@
 var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
+var CustomerLookup = require('./components/customerLookup.js') 
+var async = require('async');
 
 $(document).ready(function(){
 	ReactDOM.render(
-  <CustomerLookup />,
-  $('#customer-lookup-container')[0]
-);
+		<CustomerLookup onChange={customerLookupChange} />,
+		$('#customer-lookup-container')[0]
+	);
+});
+var customer;
+function customerLookupChange(c){
+	customer = c;
+}
 
-})
-var CustomerBox = React.createClass({
-	
-	render: function(){
-		var customer = this.props.data;
-		return (
-			<div className='col-xs-12 col-sm-6 col-md-4 customer-box' onClick={this.boxClicked}>
-				<div className='thumbnail' >
-					<div className='caption'>
-						<h3><span className='glyphicon glyphicon-user'/> {customer.name.first} {customer.name.last}</h3>
-						<p>{customer.phone}</p>
-						<p>{customer.email}</p>
-						<p>{customer.billingAddress}</p>
-					</div>
-				</div>
-			</div>
-		);
-	},
-	boxClicked: function(e){
-		if (this.props.onSelect)
-			this.props.onSelect(this.props.data);
+$("#btn-save").on("click", function(event){
+	try{
+		var dbCustomer = customer;
+		if (typeof dbCustomer.name != "object"){
+			dbCustomer.name = getNameObject(customer.name);
+		}
+		var customerID = dbCustomer._id;
+		async.series([
+			function(cb){
+				if (!dbCustomer._id){
+					saveCustomer(dbCustomer, function(saved){
+						console.log("customer saved", dbCustomer, saved);
+						dbCustomer._id = saved.user._id;
+						cb();
+					});
+				} else {
+					cb();
+				}
+			},
+			function(){
+				saveWorkOrder({
+					"customer": dbCustomer._id,
+					"description": $("#description").val()
+				}, function(result){
+					alert("Fantastic!");
+					console.log("/workorder/save", result);
+				});
+			}
+		]);
 	}
+	catch (e){
+		console.log(e);
+		alert("Ooops! someting is not working.");
+	}
+	return false;
 });
-var CustomerBoxList = React.createClass({
-	
-	render: function(){
-		var list = this.props.data.map(function(item){
-			return <CustomerBox onSelect={this.customerSelected} key={item._id} data={item}/>
-		}.bind(this));
-		return (<div className="customer-box-list row margin-top">
-				{list} 
-			</div>);
-	},
-	customerSelected: function(customer){
-		this.props.onSelect(customer);
-	}
-});
-var CustomerLookup = React.createClass({
-  render: function() {
-	// var msg = this.state.existingCustomerSelected ? <span className='existing-customer'>Existing Customer!</span> : null;
-	var c = this.state.selectedCustomer;
-	var customerBox = c ? 
-		(<div> <CustomerBox key={c._id} data={c} onSelect={this.changeSelection}/> 
-			<div className='btn btn-default' onClick={this.changeSelection}>Change</div>
-		</div>): null;
-	 
-	var custdata = this.state.custdata;
-	var matchedCustomers = null;
-	if (custdata && custdata.length) {
-		matchedCustomers = <CustomerBoxList data={custdata} onSelect={this.customerSelected}/>; 
-	}
-	var newCustomer = this.state.newCustomer;
-	var newCustomerExtraControls = !c && newCustomer.name && (newCustomer.phone || newCustomer.email) ? 
-			(<div>
-			<div className="row margin-top">
-				<div className="col-sm-12 col-xs-12">
-					<textarea rows="4" className="form-control" placeholder="Address"/>
-				</div>
-			</div>
-			<div className="alert alert-success margin-top-sm">New <strong>customer</strong> will be created.</div>
-			</div>
-			)
-			:
-			null;
-	var newCustomerControls = !c ?
-			(<div className="row">
-				<div className="col-sm-4 col-xs-12">
-					<input name="lookup-name" onChange={this.nameChanged} value={this.state.newCustomer.name} placeholder="Name" className="form-control margin-top-sm"/>
-				</div>
-				<div className="col-sm-4 col-xs-12">
-					<div className="input-group margin-top-sm">
-						<div className="input-group-addon" ><span className="glyphicon glyphicon-earphone"/> </div>
-						<input name="customer-phone" type="text" onChange={this.phoneChanged} value={this.state.newCustomer.phone}  className="form-control" placeholder="Phone" />
-					</div>
-				</div>
-				<div className="col-sm-4 col-xs-12">
-					<div className="input-group margin-top-sm">
-						<span className="input-group-addon" >@</span>
-						<input name="customer-email" type="text" onChange={this.emailChanged} value={this.state.newCustomer.email}  className="form-control" placeholder="Email" />
-					</div>
-				</div>
-			</div>)
-			: null;
-	
-    return (
-	<div>
-		{customerBox}
-		{newCustomerControls}
-		{newCustomerExtraControls}
-		{matchedCustomers}
-	</div>);
-  },
-  getInitialState: function(){
-	return({
-		custdata: null,
-		custdataTemp: null,
-		selectedCustomer: null,
-		newCustomer: {name:"", email:"", phone:""}
-	});  
-  },
-  nameChanged: function(e){
-	  var name = e.target.value;
-	  var newCustomer = this.state.newCustomer;
-	  newCustomer.name = name;
-	  this.setState({newCustomer: newCustomer});
-	  this.search(newCustomer);
-  },
-  phoneChanged: function(e){
-	  var phone = e.target.value;
-	  var newCustomer = this.state.newCustomer;
-	  newCustomer.phone = phone;
-	  this.setState({newCustomer: newCustomer});
-	  this.search(newCustomer);
-  },
-  emailChanged: function(e){
-	  var email = e.target.value;
-	  var newCustomer = this.state.newCustomer;
-	  newCustomer.email = email;
-	  this.setState({newCustomer: newCustomer});
-	  this.search(newCustomer);
-  },
-  search: function(c){
-	  if (c.name || c.phone || c.email){
-		$.get('/custdata?name=' + c.name + '&phone=' + c.phone + '&email=' + c.email, function(result){
-			this.setState({
-				custdata: result.customers
-			});
-		}.bind(this));
-	  }	
-  },
-  customerSelected: function(customer){
-	var custdata = this.state.custdata;
-	this.setState({
-		selectedCustomer: customer,
-		custdata: null, // customer get picked!, no need to keep the list of matched records
-		custdataTemp: custdata // in case the user changes mind
+
+
+
+function saveCustomer(customer, cb){
+	$.post("/api/customer/create", customer, function(result){
+		console.log("/customer/save", result);
+		cb(result);
 	});
-  },
-  changeSelection: function(){
-  	this.setState({
-		  selectedCustomer: null,
-		  custdata: this.state.custdataTemp
-	  });
-  }
-});
+}
 
+function saveWorkOrder(workOrder, cb){
+	$.post("/api/workorder/create", workOrder, function(result){
+		cb(result);
+	});
+}
+
+function getNameObject(name){
+	if (!name) return null;
+	
+	var first, last, delimiterIndex = name.indexOf("-");
+	if (delimiterIndex != -1){
+		first = name.substring(0, delimiterIndex - 1).trim();
+		last = name.substring(delimiterIndex + 1).trim();
+	} else {
+		// 'Paul Steve Panakkal'.split(' ').slice(0, -1).join(' '); // returns "Paul Steve"
+		// 'Paul Steve Panakkal'.split(' ').slice(-1).join(' '); // returns "Panakkal"
+		first = name.split(' ').slice(0, -1).join(' ');
+		last = name.split(' ').slice(-1).join(' ');
+	}
+	return {first: first, last: last};
+}

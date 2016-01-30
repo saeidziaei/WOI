@@ -14,18 +14,23 @@ block content
 		if submitted
 			h3 Quote Successfully Saved.
 		else
-			.row: .col-sm-8.col-md-6
-				form(method='post')
-					input(type='hidden', name='action', value='quote')
-					.form-group(class=validationErrors.description ? 'has-error' : null)
-						label Description of service
-						textarea(name='description', value=formData['description']).form-control
-					.form-group(class=validationErrors.items ? 'has-error' : null)
+			//.row: .col-sm-8.col-md-6
+			form(method='post')
+				input(type='hidden', name='action', value='quote')
+				.form-group(class=validationErrors.items ? 'has-error' : null)
+					if locals.standardItems
 						label Service items
-						///input(type='checkbox', name='items.upgrade', value=formData.items.upgrade).form-control
-
-					.form-actions
-						button(type='submit').btn.btn-primary Save
+						.row
+						each item, item_i in locals.standardItems
+							.col-xs-12.col-sm-6
+								h4
+									input(type='checkbox' name="item"+item_i)
+									span.margin-text= item
+				.form-group(class=validationErrors.description ? 'has-error' : null)
+					label Description of service
+					textarea(name='description', id='description' value=formData['description']).form-control
+				.form-actions
+					button(type='submit', id='btn-save').btn.btn-primary Save
 block js
 	script(src='/js/bundle.js')
 	
