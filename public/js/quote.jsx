@@ -14,14 +14,44 @@ var customer;
 function customerLookupChange(c){
 	customer = c;
 }
-
+function getWorkOrder(){
+	var wo = {
+		"description": $("#description").val().trim()
+	}
+	var items = [];
+	$(".service-item").each(function(i, c){
+		if (c.checked ) {
+			items.push($(c).siblings("span").text());
+		}
+	});
+	wo.items = items;
+	
+	return wo;
+}
+$('.alert .close').on('click', function(e) {
+    $(this).parent().addClass("hidden");
+});
+function showError(s){
+	$("#validation").removeClass("hidden");
+	$("#validation #text").html(s);
+}
 $("#btn-save").on("click", function(event){
+	event.preventDefault();
+
 	try{
+		if (!customer){
+			showError("Customer is missing.");
+			return;
+		}
+		var wo = getWorkOrder();
+		if (!wo.description && !wo.items.length){
+			showError("What work needs to be done?");
+			return;
+		}
 		var dbCustomer = customer;
 		if (typeof dbCustomer.name != "object"){
 			dbCustomer.name = getNameObject(customer.name);
 		}
-		var customerID = dbCustomer._id;
 		async.series([
 			function(cb){
 				if (!dbCustomer._id){
@@ -35,11 +65,9 @@ $("#btn-save").on("click", function(event){
 				}
 			},
 			function(){
-				saveWorkOrder({
-					"customer": dbCustomer._id,
-					"description": $("#description").val()
-				}, function(result){
-					alert("Fantastic!");
+				wo.customer = dbCustomer._id;
+				saveWorkOrder(wo, function(result){
+					alert("All done!");
 					console.log("/workorder/save", result);
 				});
 			}

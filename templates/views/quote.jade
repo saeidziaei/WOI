@@ -24,15 +24,17 @@ block content
 						each item, item_i in locals.standardItems
 							.col-xs-12.col-sm-6
 								h4
-									input(type='checkbox' name="item"+item_i)
+									input.service-item(type='checkbox', name="item"+item_i)
 									span.margin-text= item
 				.form-group(class=validationErrors.description ? 'has-error' : null)
 					label Description of service
 					textarea(name='description', id='description' value=formData['description']).form-control
+				#validation.alert.alert-danger.hidden( role="alert")
+					button.close(type='button', aria-label='Close')
+						span(aria-hidden='true') ×
+					span#text hi
 				.form-actions
 					button(type='submit', id='btn-save').btn.btn-primary Save
 block js
-	script(src='/js/bundle.js')
+	script(src='/js/quote-bundle.js')
 	
-block css
-	link(href="/styles/quote.css", rel="stylesheet")

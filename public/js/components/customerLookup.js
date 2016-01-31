@@ -8,7 +8,7 @@ var CustomerLookup = React.createClass({
 	// var msg = this.state.existingCustomerSelected ? <span className='existing-customer'>Existing Customer!</span> : null;
 	var c = this.state.selectedCustomer;
 	var customerBox = c ? 
-		(<div> <CustomerBox className='customer-box-selected' key={c._id} data={c} onSelect={this.changeSelection}/> 
+		(<div> <CustomerBox className='customer-box-selected col-xs-12 col-sm-6 col-md-4 customer-box' key={c._id} data={c} onSelect={this.changeSelection}/> 
 			<div className='btn btn-default' onClick={this.changeSelection}>Change</div>
 		</div>): null;
 	 

@@ -19,3 +19,24 @@ exports.create = function(req, res) {
 		
 	});
 }
+
+
+
+/**
+ * List Posts
+ */
+exports.list = function(req, res) {
+	var q = keystone.list('WorkOrder').model
+		.find({"customer":{$exists:true}})
+		.sort('-createdAt')
+		.populate('customer createdBy')
+		.limit('40');
+	
+	q.exec(function(err, results) {
+		if (err) return res.apiError('database error', err);
+		
+		res.apiResponse({
+			workorders: results
+		});
+	});
+}

@@ -1,0 +1,11 @@
+mixin op-workorder(wo)
+	.thumbnail
+		.caption: .row
+			.col.col-sm-6
+				h3= wo.customer.name.full
+				p= wo.description
+				p= wo.createdBy.name.full
+				.btn.btn-default Assign To Me
+			.col.col-sm-6
+				each item, item_i in wo.items
+					p= item

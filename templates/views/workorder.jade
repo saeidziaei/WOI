@@ -1,0 +1,19 @@
+extends ../layouts/default
+include ../mixins/op-workorder
+
+block intro
+	.container
+		h1 Work Orders
+		
+block content
+	.container
+		.panel.panel-default
+			.panel-heading Work Orders
+			.panel-body
+				#list-container
+				// each item, item_i in locals.workorders
+				// 	.col-xs-12.col-sm-6
+				// 		+op-workorder(item)
+block js
+	script(src='/js/workorder-bundle.js')
+	

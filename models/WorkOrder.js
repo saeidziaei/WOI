@@ -11,9 +11,9 @@ var WorkOrder = new keystone.List('WorkOrder', {
 });
 
 WorkOrder.add({
-	customer: { type: Types.Relationship, required: true, ref: 'Customer', index: true, initial: false },
+	customer: { type: Types.Relationship, required: true, ref: 'User', index: true, initial: false },
     status : {type: String, required: true, default: 'quote', index:true },
-    description: {type: String },
+    description: {type: String, initial: true },
     items: {type: Types.TextArray}
 });
 
