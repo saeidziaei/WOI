@@ -2,6 +2,9 @@ var React = require('react');
 var CustomerBox = React.createClass({
 	render: function(){
 		var customer = this.props.data;
+		var moreLink = customer && customer._id ?
+			<p><a onClick={this.stopPropagation} target="_blank" href={'/customer/' + customer._id}>More ...</a></p> :
+			null;
 		return (
 			<div className={this.props.className } onClick={this.boxClicked}>
 				<div className='thumbnail' >
@@ -10,6 +13,7 @@ var CustomerBox = React.createClass({
 						<p>{customer.phone}</p>
 						<p>{customer.email}</p>
 						<p>{customer.billingAddress}</p>
+						{moreLink}
 					</div>
 				</div> 
 			</div>
@@ -18,6 +22,9 @@ var CustomerBox = React.createClass({
 	boxClicked: function(e){
 		if (this.props.onSelect)
 			this.props.onSelect(this.props.data);
+	},
+	stopPropagation: function(e){
+		 e.stopPropagation();
 	}
 });
 

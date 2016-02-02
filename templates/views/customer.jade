@@ -1,0 +1,32 @@
+extends ../layouts/default
+
+block intro
+	.container
+		h1 Customer
+		
+block content
+	.container
+		if submitted
+			h3 Customer record saved.
+		else
+			row: .col-sm-8.col-md-6
+				form(method='post')
+					input(type='hidden', name='action', value='customer')
+					input(type='hidden', name='_id', value=customer._id)
+					.form-group(class=validationErrors.name ? 'has-error' : null)
+						label Name
+						input(type='text', name='name.full', value=customer.name.full).form-control
+					.form-group(class=validationErrors.email ? 'has-error' : null)
+						label Email
+						input(type='email', name='email', value=customer.email).form-control
+					.form-group
+						label Phone
+						input(type='text', name='phone', value=customer.phone, placeholder='(optional)').form-control
+					.form-group(class=validationErrors.billingAddress ? 'has-error' : null)
+						label Billing Address
+						textarea(name='billingAddress', rows=4).form-control= customer.billingAddress
+					.form-group(class=validationErrors.shippingAddress ? 'has-error' : null)
+						label Shipping Address
+						textarea(name='shippingAddress', rows=4).form-control= customer.shippingAddress
+					.form-actions
+						button(type='submit').btn.btn-primary Save

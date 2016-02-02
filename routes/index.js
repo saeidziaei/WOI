@@ -42,6 +42,7 @@ exports = module.exports = function(app) {
 	app.get('/gallery', routes.views.gallery);
 	app.all('/contact', routes.views.contact);
 	app.all('/workorder', middleware.requireStaff, routes.views.workorder);
+	app.all('/customer/:customer?', middleware.requireStaff, routes.views.customer);
 	
 	
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:
@@ -55,5 +56,6 @@ exports = module.exports = function(app) {
 	app.post('/api/workorder/create', keystone.middleware.api, middleware.requireUser, routes.api.workorder.create);
 	app.get('/api/workorder/list', keystone.middleware.api, middleware.requireUser, routes.api.workorder.list);
 	
+	app.post('/api/workorderactivity/create', keystone.middleware.api, middleware.requireUser, routes.api.workorderactivity.create);
 	
 };

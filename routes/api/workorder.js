@@ -1,5 +1,6 @@
 var keystone = require('keystone');
 var WorkOrder = keystone.list('WorkOrder');
+var async = require('async');
 
 /**
  * Create a Work Order
@@ -26,17 +27,31 @@ exports.create = function(req, res) {
  * List Posts
  */
 exports.list = function(req, res) {
+	
 	var q = keystone.list('WorkOrder').model
 		.find({"customer":{$exists:true}})
 		.sort('-createdAt')
-		.populate('customer createdBy')
+		.populate([
+			{path:"customer", select:"name phone email"}, 
+			{path:"createdBy", select:"name"}
+		])
 		.limit('40');
 	
 	q.exec(function(err, results) {
 		if (err) return res.apiError('database error', err);
-		
-		res.apiResponse({
-			workorders: results
+		async.forEach(results, function(w, callback) { //The second argument (callback) is the "task callback" for a specific messageId
+				w.populateRelated("activities[createdBy]", function(){
+					w._doc.activities = w.activities;
+					callback();
+				});
+			}, function(err) {
+				if (err) return res.apiError('database error populate related', err);
+				res.apiResponse({
+					workorders: results
+			});
+			
 		});
 	});
+		
+	
 }

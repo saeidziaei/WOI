@@ -30133,6 +30133,15 @@ var CustomerBox = React.createClass({
 
 	render: function () {
 		var customer = this.props.data;
+		var moreLink = customer && customer._id ? React.createElement(
+			'p',
+			null,
+			React.createElement(
+				'a',
+				{ onClick: this.stopPropagation, target: '_blank', href: '/customer/' + customer._id },
+				'More ...'
+			)
+		) : null;
 		return React.createElement(
 			'div',
 			{ className: this.props.className, onClick: this.boxClicked },
@@ -30165,13 +30174,17 @@ var CustomerBox = React.createClass({
 						'p',
 						null,
 						customer.billingAddress
-					)
+					),
+					moreLink
 				)
 			)
 		);
 	},
 	boxClicked: function (e) {
 		if (this.props.onSelect) this.props.onSelect(this.props.data);
+	},
+	stopPropagation: function (e) {
+		e.stopPropagation();
 	}
 });
 
