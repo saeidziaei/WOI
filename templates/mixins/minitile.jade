@@ -1,0 +1,8 @@
+mixin minitile(id, text, title, faIcon, colorClass)
+  a(href='#', target='_self', title=title)
+    div(id=id class=colorClass + ' tile')
+      .tile-img
+        i(class=faIcon + ' fa')
+      .tile-name.text-center
+        | #{text}
+        

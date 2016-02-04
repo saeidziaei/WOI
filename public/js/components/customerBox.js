@@ -3,7 +3,12 @@ var CustomerBox = React.createClass({
 	render: function(){
 		var customer = this.props.data;
 		var moreLink = customer && customer._id ?
-			<p><a onClick={this.stopPropagation} target="_blank" href={'/customer/' + customer._id}>More ...</a></p> :
+			<div className="row">
+				<div className="col col-sm12 text-right margin-text">
+					<a onClick={this.stopPropagation} target="_blank" 
+						href={'/customer/' + customer._id}>More ...</a>
+				</div>
+			</div> :
 			null;
 		return (
 			<div className={this.props.className } onClick={this.boxClicked}>

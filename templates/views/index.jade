@@ -1,4 +1,5 @@
 extends ../layouts/default
+include ../mixins/minitile
 
 block content
 	.container: .jumbotron
@@ -22,3 +23,32 @@ block content
 		p Remember to <a href='https://github.com/keystonejs/keystone' target='_blank'>Star KeystoneJS on GitHub</a> and
 			| <a href='https://twitter.com/keystonejs' target='_blank'>follow @keystonejs</a> on twitter for updates.
 		a(href='/quote').btn.btn-primary.btn-lg New Quote
+		
+		.tiles-container
+		.row
+			.col-xs-12.col-sm-4
+				a(href='#', title='Navigate to View Payment History')
+				.next-payment.tile
+					.text-right
+					span.payment-amount= '$' 
+					br
+					.tile-name.bottom-left
+					| Next payment
+				.tile.another-tile
+					h3 Another Tile
+				.tile.last-payment
+					h3 Number 3
+			.col-xs-12.col-sm-4
+				.tile.tile-full-height
+					h3 Full Height
+			.col-xs-12.col-sm-4.tiles-group
+				.row
+				.col-xs-12.col-sm-6
+					+minitile('950', ("tile.create-ad"), 'Navigate somewhere!', 'fa-bolt', 'orange')
+				.col-xs-12.col-sm-6
+					+minitile('951', ("tile.buy-bitcoin"), 'Click to go to request doco', 'fa-bitcoin', 'green')
+				.row
+				.col-xs-12.col-sm-6
+					+minitile('952', ("tile.contact-us"), 'Navigate somewhere!', 'fa-paper-plane-o', 'purple')
+				.col-xs-12.col-sm-6
+					+minitile('953', ("tile.sell-bitcoin"), 'Click to go to request doco', 'fa-bitcoin', 'orange')

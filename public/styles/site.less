@@ -25,6 +25,9 @@
 // Add your own site style includes here
 @import "site/layout.less";
 
+// $fa-font-path:"../node_modules/font-awesome/fonts";
+@import "node_modules/font-awesome/less/font-awesome.less";
+
 
 .margin-top{
 	margin-top: 10px;
@@ -51,3 +54,73 @@
 .clickable{
 	cursor: pointer;
 }
+
+.tile-img{
+    font-size: 40pt;
+    text-align: center;
+}
+.next-payment, .another-tile {
+  background: #1378af;
+  }
+  .next-payment:hover, .another-tile:hover {
+  background: #0d547a;
+  }
+  .tile {
+  min-height: 140px;
+  margin-top: 15px;
+  display: block;
+  padding: 5px 15px 15px 15px;
+  position: relative;
+  border-radius: 5px;
+  }
+  .payment-amount {
+  font-size: 2.5em;
+  }
+  .tiles-container a {
+  color: #fff;
+  text-decoration: none;
+  }
+  .tile {
+  min-height: 140px;
+  margin-top: 15px;
+  display: block;
+  padding: 5px 15px 15px 15px;
+  position: relative;
+  }
+  .header-bar{
+  background-color:#000;
+  color:white;
+  }
+  .tile-full-height{
+  min-height:450px;
+  background-color:#FE9;
+  }
+  .reminders.full{
+  background-size:450px;
+  min-height:450px;
+  
+  }
+  .my-profile{
+  background:#1378af;
+  }
+  .my-profile:hover{
+  background:#0d547a;
+  }
+  .my-profile .tile-img{
+  background:url('../images/icon-landingpage-myprofile.png') no-repeat center center;
+  }
+  .purple{
+  background:#823df0;
+  }
+  .purple:hover{
+  background:#5b2ba8;
+  }
+  .request-doc .tile-img{
+  background:url('../images/request-document.png') no-repeat center center;
+  }
+  .green{
+  background:#49850c;
+  }
+  .green:hover{
+  background:#335d08;
+  }

@@ -30129,49 +30129,54 @@ module.exports = require('./lib/React');
 },{"./lib/React":28}],161:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = React.createClass({
-	displayName: 'CustomerBox',
+	displayName: "CustomerBox",
 
 	render: function () {
 		var customer = this.props.data;
 		var moreLink = customer && customer._id ? React.createElement(
-			'p',
-			null,
+			"div",
+			{ className: "row" },
 			React.createElement(
-				'a',
-				{ onClick: this.stopPropagation, target: '_blank', href: '/customer/' + customer._id },
-				'More ...'
+				"div",
+				{ className: "col col-sm12 text-right margin-text" },
+				React.createElement(
+					"a",
+					{ onClick: this.stopPropagation, target: "_blank",
+						href: '/customer/' + customer._id },
+					"More ..."
+				)
 			)
 		) : null;
 		return React.createElement(
-			'div',
+			"div",
 			{ className: this.props.className, onClick: this.boxClicked },
 			React.createElement(
-				'div',
-				{ className: 'thumbnail' },
+				"div",
+				{ className: "thumbnail" },
 				React.createElement(
-					'div',
-					{ className: 'caption' },
+					"div",
+					{ className: "caption" },
 					React.createElement(
-						'h3',
+						"h3",
 						null,
-						React.createElement('span', { className: 'glyphicon glyphicon-user' }),
-						' ',
+						React.createElement("span", { className: "glyphicon glyphicon-user" }),
+						" ",
 						customer.name.first,
-						' ',
+						" ",
 						customer.name.last
 					),
 					React.createElement(
-						'p',
+						"p",
 						null,
 						customer.phone
 					),
 					React.createElement(
-						'p',
+						"p",
 						null,
 						customer.email
 					),
 					React.createElement(
-						'p',
+						"p",
 						null,
 						customer.billingAddress
 					),
