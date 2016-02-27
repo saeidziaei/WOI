@@ -45,21 +45,23 @@ var CustomerLookup = React.createClass({
 			null;
 	var newCustomerControls = !c ?
 			(<div className="row">
-				<div className="col-sm-4 col-xs-12">
-					<input name="lookup-name" onChange={this.nameChanged} value={this.state.newCustomer.name} placeholder="Name (first - last)" className="form-control margin-top-sm"/>
-				</div>
-				<div className="col-sm-4 col-xs-12">
-					<div className="input-group margin-top-sm">
-						<div className="input-group-addon" ><span className="glyphicon glyphicon-earphone"/> </div>
-						<input name="customer-phone" type="text" onChange={this.phoneChanged} value={this.state.newCustomer.phone}  className="form-control" placeholder="Phone" />
+				<form>
+					<div className="input-field col s12 m4">
+						<i className="material-icons prefix">account_circle</i>
+						<input type="text" id="lookup-name" onChange={this.nameChanged} value={this.state.newCustomer.name}  />
+						<label htmlFor="lookup-name">Name (first last)</label>
 					</div>
-				</div>
-				<div className="col-sm-4 col-xs-12">
-					<div className="input-group margin-top-sm">
-						<span className="input-group-addon" >@</span>
-						<input name="customer-email" type="text" onChange={this.emailChanged} value={this.state.newCustomer.email}  className="form-control" placeholder="Email" />
+					<div className="input-field col s12 m4">
+						<i className="material-icons prefix">phone</i>
+						<input type="text" id="customer-phone" type="text" onChange={this.phoneChanged} value={this.state.newCustomer.phone}  className="form-control"  />
+						<label htmlFor="customer-phone">Phone</label>
 					</div>
-				</div>
+					<div className="input-field col s12 m4">
+						<i className="material-icons prefix">email</i>
+						<input type="text" id="customer-email" type="text" onChange={this.emailChanged} value={this.state.newCustomer.email}  className="form-control"  />
+						<label htmlFor="customer-email">Email</label>
+					</div>
+				</form>
 			</div>)
 			: null;
 	

@@ -42,7 +42,7 @@ exports = module.exports = function(req, res){
 		
 		updater.process(req.body, {
 			flashErrors: true,
-			fields: 'name, email, phone, billingAddress, shippingAddress',
+			fields: 'name, company, email, phone, billingAddress, shippingAddress, ABN',
 			errorMessage: 'There was a problem savign customer:'
 		}, function(err) {
 			if (err) {

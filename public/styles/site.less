@@ -7,7 +7,7 @@
 //
 // Bootstrap can be removed entirely by deleting this line.
 
-@import "bootstrap/bootstrap.less";
+// @import "bootstrap/bootstrap.less";
 
 // The easiest way to customise Bootstrap variables while
 // being able to easily override the source files with new
@@ -28,33 +28,43 @@
 // $fa-font-path:"../node_modules/font-awesome/fonts";
 @import "node_modules/font-awesome/less/font-awesome.less";
 
-
+@import "materialize.min.css";
+html{
+	font-family: "Roboto", sans-serif;
+}
+.header{
+	color: #ee6e73;
+    font-weight: 300;
+}
+.font-double{
+	font-style: 2em;
+}
+.margin-right{
+	margin-right: 10px;
+}		  
 .margin-top{
 	margin-top: 10px;
 }
 .margin-top-sm{
 	margin-top: 5px;
 }
-.customer-box .thumbnail{
-	min-height: 200px;
+.customer-box .card{
+	min-height: 225px;
 }
-.customer-box .thumbnail:hover{
-	background-color: #eee;
-	cursor: pointer;
-}
+
 .input-group{
 	margin-top: 5px;
 }
-.customer-box-selected .thumbnail{
-	border:1px black solid;
-}
+
 .margin-text{
 	margin: 5px;
 }
 .clickable{
 	cursor: pointer;
 }
-
+.blue{
+	color: #1378af;
+}
 .tile-img{
     font-size: 40pt;
     text-align: center;

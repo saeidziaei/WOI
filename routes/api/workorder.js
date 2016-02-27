@@ -32,7 +32,7 @@ exports.list = function(req, res) {
 		.find({"customer":{$exists:true}})
 		.sort('-createdAt')
 		.populate([
-			{path:"customer", select:"name phone email"}, 
+			{path:"customer", select:"name phone email company"}, 
 			{path:"createdBy", select:"name"}
 		])
 		.limit('40');

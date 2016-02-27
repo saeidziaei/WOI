@@ -2,25 +2,24 @@ var React = require('react');
 var CustomerBox = React.createClass({
 	render: function(){
 		var customer = this.props.data;
+		var displayName = this.customerName(customer);
 		var moreLink = customer && customer._id ?
-			<div className="row">
-				<div className="col col-sm12 text-right margin-text">
-					<a onClick={this.stopPropagation} target="_blank" 
-						href={'/customer/' + customer._id}>More ...</a>
-				</div>
+			<div className="card-action">
+					<a onClick={this.stopPropagation} target="_blank" href={'/customer/' + customer._id}>Edit</a>
 			</div> :
 			null;
 		return (
-			<div className={this.props.className } onClick={this.boxClicked}>
-				<div className='thumbnail' >
-					<div className='caption'>
-						<h3><span className='glyphicon glyphicon-user'/> {customer.name.first} {customer.name.last}</h3>
+			<div className={this.props.className } onClick={this.boxClicked} >
+				<div className='card hoverable clickable light-blue lighten-5' >
+					<div className='card-content' >
+						<span className="card-title"><span className='glyphicon glyphicon-user'/>  {displayName}</span>
 						<p>{customer.phone}</p>
 						<p>{customer.email}</p>
 						<p>{customer.billingAddress}</p>
-						{moreLink}
 					</div>
+					{moreLink}
 				</div> 
+				
 			</div>
 		);
 	},
@@ -30,6 +29,15 @@ var CustomerBox = React.createClass({
 	},
 	stopPropagation: function(e){
 		 e.stopPropagation();
+	},
+	customerName: function(c){
+		var fullName = c.name.first + " " + c.name.last;
+	
+		if (c.company){
+			return c.company + " (" + fullName + ")";
+		} else {
+			return fullName;
+		}
 	}
 });
 

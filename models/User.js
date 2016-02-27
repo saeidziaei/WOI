@@ -22,10 +22,20 @@ User.add({
 	'Customer', {
 		billingAddress: {type: String},
 		shippingAddress: {type: String},
-		company: {type: String}
+		company: {type: String},
+		ABN: {type: String},
 	}
 );
 
+User.schema.virtual('displayName').get(function(){
+	var fullName = this.name.first + " " + this.name.last;
+	
+	if (this.company){
+		return this.company + " (" + fullName + ")";
+	} else {
+		return fullName;
+	}
+});
 // Provide access to Keystone
 User.schema.virtual('canAccessKeystone').get(function() {
 	return this.isAdmin;

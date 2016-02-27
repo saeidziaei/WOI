@@ -6,35 +6,32 @@ block intro
 		
 block content
 	.container
-		.search-customer.panel.panel-default
-			.panel-heading Customer
-			.panel-body
-				#customer-lookup-container
+		h3.header Customer
+		#customer-lookup-container
 
 		if submitted
-			h3 Quote Successfully Saved.
+			h4 Quote Successfully Saved.
 		else
+			h3.header Service
 			//.row: .col-sm-8.col-md-6
 			form(method='post')
 				input(type='hidden', name='action', value='quote')
 				.form-group(class=validationErrors.items ? 'has-error' : null)
 					if locals.standardItems
-						label Service items
 						.row
-						each item, item_i in locals.standardItems
-							.col-xs-12.col-sm-6
-								h4
-									input.service-item(type='checkbox', name="item"+item_i)
-									span.margin-text= item
-				.form-group(class=validationErrors.description ? 'has-error' : null)
-					label Description of service
-					textarea(name='description', id='description' value=formData['description']).form-control
-				#validation.alert.alert-danger.hidden( role="alert")
-					button.close(type='button', aria-label='Close')
-						span(aria-hidden='true') ×
-					span#text hi
-				.form-actions
-					button(type='submit', id='btn-save').btn.btn-primary Save
+							each item, item_i in locals.standardItems
+								.col.s12.m6
+									input(type="checkbox", id="item" + item_i) 
+									label(for="item" + item_i)= item
+								
+				.input-field(class=validationErrors.description ? 'has-error' : null)
+					i.material-icons.prefix mode_edit
+					label(for='description') Description of service
+					textarea(name='description', id='description' value=formData['description']).materialize-textarea
+				#validation.card-panel.red.lighten-1.hide.white-text
+					i.material-icons.margin-right info
+					span#text Error text
+				button(type='submit', id='btn-save').btn Save
 block js
 	script(src='/js/quote-bundle.js')
 	

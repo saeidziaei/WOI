@@ -3,27 +3,66 @@ include ../mixins/minitile
 
 block content
 	.container: .jumbotron
-		img(src='/images/logo.svg', width='160')
-		h1 Welcome
-		p This is your new <a href='http://keystonejs.com' target='_blank'>KeystoneJS</a> website.
-		p It includes the latest versions of
-			| <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>
-			| and <a href='http://www.jquery.com/' target='_blank'>jQuery</a>.
-		p Visit the <a href='http://keystonejs.com/guide' target='_blank'>Getting Started</a> guide to learn how to customise it.
-		hr
+		// img(src='/images/logo.svg', width='160')
 		if user && user.canAccessKeystone
 			p
 				a(href='/keystone').btn.btn-lg.btn-primary Open the Admin UI
-		else
-			p We have created a default Admin user for you with the email <strong>sz@builditweb.com.au</strong> and the password <strong>admin</strong>.
-			p
-				a(href='/keystone/signin', style='margin-right: 10px').btn.btn-lg.btn-primary Sign in
-				|  to use the Admin UI.
-		hr
-		p Remember to <a href='https://github.com/keystonejs/keystone' target='_blank'>Star KeystoneJS on GitHub</a> and
-			| <a href='https://twitter.com/keystonejs' target='_blank'>follow @keystonejs</a> on twitter for updates.
-		a(href='/quote').btn.btn-primary.btn-lg New Quote
+		// hr
+			
+		.row.margin-top
+			.col.s12.m4
+				a(href='/workorder/unassigned')
+					.card.hoverable
+						.card-content
+							span.card-title Unassigned Jobs
+							h3.row(style="color:#E57373")
+								.col.s4
+									i.fa.fa-warning
+								.col.s4.offset-s4
+									|45
+						
+			.col.s12.m4
+				a(href='/workorder/unassigned')
+					.card.hoverable
+						.card-content
+							span.card-title In Progress
+							h3.row(style="color:#4db6ac")
+								.col.s4
+									i.fa.fa-thumbs-o-up
+								.col.s4.offset-s4
+									|23 
+
+			.col.s12.m4
+				a(href='/workorder/unassigned')
+					.card.hoverable
+						.card-content
+							span.card-title Waiting 
+							h3.row(style="color:grey")
+								.col.s4
+									i.fa.fa-refresh
+								.col.s4.offset-s4
+									|3
+
+			.col.s12.m4
+				.card.hoverable
+					.card-content
+						span.card-title Find By Job Number
+						.row
+							.input-field.col.s8
+								input#lookup-name(type='text')
+							.valign-wrapper.col.s4
+								.margin-top 
+									a.valign.btn.waves-effect.margin-top Go
+					.card-action
+						a.btn-floating.btn-large.waves-effect.waves-light.red.lighten-2.margin-right(href='/quote') 
+							i.material-icons add
+						a.btn-floating.btn-large.waves-effect.waves-light.blue.lighten-2(href='/workorder') 
+							i.material-icons search
+				
 		
+		
+		
+	//		
 		.tiles-container
 		.row
 			.col-xs-12.col-sm-4
@@ -43,12 +82,14 @@ block content
 					h3 Full Height
 			.col-xs-12.col-sm-4.tiles-group
 				.row
-				.col-xs-12.col-sm-6
+				.col.s6.m4
 					+minitile('950', ("tile.create-ad"), 'Navigate somewhere!', 'fa-bolt', 'orange')
-				.col-xs-12.col-sm-6
+				.col.s6.m4
 					+minitile('951', ("tile.buy-bitcoin"), 'Click to go to request doco', 'fa-bitcoin', 'green')
 				.row
-				.col-xs-12.col-sm-6
+				.col.s6.m4
 					+minitile('952', ("tile.contact-us"), 'Navigate somewhere!', 'fa-paper-plane-o', 'purple')
-				.col-xs-12.col-sm-6
+				.col.s6.m4
 					+minitile('953', ("tile.sell-bitcoin"), 'Click to go to request doco', 'fa-bitcoin', 'orange')
+					
+		

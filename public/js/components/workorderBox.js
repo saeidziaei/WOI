@@ -18,35 +18,37 @@ var WorkorderBox = React.createClass({
 		var list = workorder.items.map(function(item, i){
 			return <li key={i}>{item}</li>
 		}.bind(this));
-		var c = this.state.isMaximized ? "col-md-12" : "col-xs-12 col-sm-6 col-md-4";
+		
 		return (
-			<div className={c + ' workorder-box'} onClick={this.boxClicked}>
-				<div className='thumbnail' >
-					<div className='caption'>
-						<h3><span className='glyphicon glyphicon-list-alt'/> {workorder.description} 
-						<div onClick={this.toggleSize} className="btn btn-primary pull-right">O</div>
-						</h3>
+			<div className='workorder-box s12 m6 l4 col' onClick={this.boxClicked}>
+				<div className='card ' >
+					<div className='card-content ' >
+						<div className='card-title'>
+							<span className="truncate"><i className="material-icons">assignment</i> {workorder.description}</span> 
+						</div>
+	
 						<p>{workorder.status}</p>
 						<p>{workorder.createdBy.name.first} {workorder.createdBy.name.last} </p>
 						<p>{new Date(workorder.createdAt).toDateString()}</p>
 						<ul>{list}</ul>
-						<p className="clickable" onClick={this.toggleCustomer}>
-							<span className='glyphicon glyphicon-user'/> {workorder.customer.name.first} {workorder.customer.name.last}
+						<p className="clickable hoverable" onClick={this.toggleCustomer}>
+							<span className='glyphicon glyphicon-user'/> {this.customerName(workorder)}
 						</p>
 						{customerBox}
-						<div onClick={this.toggleComments} className="btn btn-default ">{this.state.showComments ? "Hide Comments" : "Comments"}</div>	
-						<div onClick={this.toggleComments} className="btn btn-default ">Assign to me</div>	
-						<div onClick={this.toggleComments} className="btn btn-default ">Close</div>	
+						<div className="card-action">
+							<div className="row">
+								<div className="col s2"><a onClick={this.toggleComments} title={this.state.showComments ? "Hide Comments" : "Comments"}  className="btn-floating  waves-effect waves-light  "><i className="material-icons">comment</i></a></div>
+								<div className="col s2"><a onClick={this.toggleComments} title="Done"  className="btn-floating  waves-effect waves-light "><i className="material-icons">done</i></a></div>
+								<div className="col s8"><a onClick={this.toggleComments} title="Assign to me"  className="btn-flat  waves-effect waves-light  ">Assign to me</a></div>
+							</div>
+							
+						
+						</div>
 						{commentBox}					
  					</div>
 				</div> 
 			</div>
 		);
-	},
-	toggleSize: function(){
-		this.setState({
-			isMaximized: !this.state.isMaximized
-		});
 	},
 	onAddComment: function(comment, cb){
 		var self = this;
@@ -73,9 +75,21 @@ var WorkorderBox = React.createClass({
 	getInitialState: function(){
 		return({
 			showCustomer: false,
-			showComments: false,
-			isMaximized: false
+			showComments: false
 		});
+	},
+	customerName: function(w){
+		var c = w.customer;
+		if (!c){
+			return "Missing Customer";
+		}
+		var fullName = c.name.first + " " + c.name.last;
+	    console.log(c);
+		if (c.company){
+			return c.company + " (" + fullName + ")";
+		} else {
+			return fullName;
+		}
 	}
 });
 

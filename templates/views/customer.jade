@@ -13,20 +13,26 @@ block content
 				form(method='post')
 					input(type='hidden', name='action', value='customer')
 					input(type='hidden', name='_id', value=customer._id)
-					.form-group(class=validationErrors.name ? 'has-error' : null)
-						label Name
-						input(type='text', name='name.full', value=customer.name.full).form-control
-					.form-group(class=validationErrors.email ? 'has-error' : null)
-						label Email
-						input(type='email', name='email', value=customer.email).form-control
-					.form-group
-						label Phone
-						input(type='text', name='phone', value=customer.phone, placeholder='(optional)').form-control
-					.form-group(class=validationErrors.billingAddress ? 'has-error' : null)
-						label Billing Address
-						textarea(name='billingAddress', rows=4).form-control= customer.billingAddress
-					.form-group(class=validationErrors.shippingAddress ? 'has-error' : null)
-						label Shipping Address
-						textarea(name='shippingAddress', rows=4).form-control= customer.shippingAddress
-					.form-actions
-						button(type='submit').btn.btn-primary Save
+					.input-field(class=validationErrors.name ? 'has-error' : null)
+						label(for="fullName") Name
+						input(type='text', id="fullName" name='name.full', value=customer.name.full).validate
+					.input-field(class=validationErrors.name ? 'has-error' : null)
+						label(for="company") Company
+						input(type='text', id="company" name='company', value=customer.company).validate
+					.input-field(class=validationErrors.name ? 'has-error' : null)
+						label(for="ABN") ABN
+						input(type='text', id="ABN" name='ABN', value=customer.ABN).validate
+					.input-field(class=validationErrors.email ? 'has-error' : null)
+						label(for="email") Email
+						input(type='email', id="email", name='email', value=customer.email).validate
+					.input-field
+						label(for="phone") Phone
+						input(type='text', id="phone", name='phone', value=customer.phone, placeholder='(optional)').validate
+					.input-field(class=validationErrors.billingAddress ? 'has-error' : null)
+						label(for="billingAddress") Billing Address
+						textarea(name='billingAddress', id='billingAddress', rows=4).materialize-textarea= customer.billingAddress
+					.input-field(class=validationErrors.shippingAddress ? 'has-error' : null)
+						label(for='shippingAddress') Shipping Address
+						textarea(name='shippingAddress', id='shippingAddress', rows=4).materialize-textarea= customer.shippingAddress
+					.input-actions
+						button(type='submit').btn Save

@@ -30482,18 +30482,14 @@ var CustomerBox = React.createClass({
 
 	render: function () {
 		var customer = this.props.data;
+		var displayName = this.customerName(customer);
 		var moreLink = customer && customer._id ? React.createElement(
 			"div",
-			{ className: "row" },
+			{ className: "card-action" },
 			React.createElement(
-				"div",
-				{ className: "col col-sm12 text-right margin-text" },
-				React.createElement(
-					"a",
-					{ onClick: this.stopPropagation, target: "_blank",
-						href: '/customer/' + customer._id },
-					"More ..."
-				)
+				"a",
+				{ onClick: this.stopPropagation, target: "_blank", href: '/customer/' + customer._id },
+				"Edit"
 			)
 		) : null;
 		return React.createElement(
@@ -30501,18 +30497,16 @@ var CustomerBox = React.createClass({
 			{ className: this.props.className, onClick: this.boxClicked },
 			React.createElement(
 				"div",
-				{ className: "thumbnail" },
+				{ className: "card hoverable clickable light-blue lighten-5" },
 				React.createElement(
 					"div",
-					{ className: "caption" },
+					{ className: "card-content" },
 					React.createElement(
-						"h3",
-						null,
+						"span",
+						{ className: "card-title" },
 						React.createElement("span", { className: "glyphicon glyphicon-user" }),
-						" ",
-						customer.name.first,
-						" ",
-						customer.name.last
+						"  ",
+						displayName
 					),
 					React.createElement(
 						"p",
@@ -30528,9 +30522,9 @@ var CustomerBox = React.createClass({
 						"p",
 						null,
 						customer.billingAddress
-					),
-					moreLink
-				)
+					)
+				),
+				moreLink
 			)
 		);
 	},
@@ -30539,6 +30533,15 @@ var CustomerBox = React.createClass({
 	},
 	stopPropagation: function (e) {
 		e.stopPropagation();
+	},
+	customerName: function (c) {
+		var fullName = c.name.first + " " + c.name.last;
+
+		if (c.company) {
+			return c.company + " (" + fullName + ")";
+		} else {
+			return fullName;
+		}
 	}
 });
 
@@ -30571,26 +30574,29 @@ var WorkorderBox = React.createClass({
 				item
 			);
 		}.bind(this));
-		var c = this.state.isMaximized ? "col-md-12" : "col-xs-12 col-sm-6 col-md-4";
+
 		return React.createElement(
 			'div',
-			{ className: c + ' workorder-box', onClick: this.boxClicked },
+			{ className: 'workorder-box s12 m6 l4 col', onClick: this.boxClicked },
 			React.createElement(
 				'div',
-				{ className: 'thumbnail' },
+				{ className: 'card ' },
 				React.createElement(
 					'div',
-					{ className: 'caption' },
+					{ className: 'card-content ' },
 					React.createElement(
-						'h3',
-						null,
-						React.createElement('span', { className: 'glyphicon glyphicon-list-alt' }),
-						' ',
-						workorder.description,
+						'div',
+						{ className: 'card-title' },
 						React.createElement(
-							'div',
-							{ onClick: this.toggleSize, className: 'btn btn-primary pull-right' },
-							'O'
+							'span',
+							{ className: 'truncate' },
+							React.createElement(
+								'i',
+								{ className: 'material-icons' },
+								'assignment'
+							),
+							' ',
+							workorder.description
 						)
 					),
 					React.createElement(
@@ -30618,38 +30624,59 @@ var WorkorderBox = React.createClass({
 					),
 					React.createElement(
 						'p',
-						{ className: 'clickable', onClick: this.toggleCustomer },
+						{ className: 'clickable hoverable', onClick: this.toggleCustomer },
 						React.createElement('span', { className: 'glyphicon glyphicon-user' }),
 						' ',
-						workorder.customer.name.first,
-						' ',
-						workorder.customer.name.last
+						this.customerName(workorder)
 					),
 					customerBox,
 					React.createElement(
 						'div',
-						{ onClick: this.toggleComments, className: 'btn btn-default ' },
-						this.state.showComments ? "Hide Comments" : "Comments"
-					),
-					React.createElement(
-						'div',
-						{ onClick: this.toggleComments, className: 'btn btn-default ' },
-						'Assign to me'
-					),
-					React.createElement(
-						'div',
-						{ onClick: this.toggleComments, className: 'btn btn-default ' },
-						'Close'
+						{ className: 'card-action' },
+						React.createElement(
+							'div',
+							{ className: 'row' },
+							React.createElement(
+								'div',
+								{ className: 'col s2' },
+								React.createElement(
+									'a',
+									{ onClick: this.toggleComments, title: this.state.showComments ? "Hide Comments" : "Comments", className: 'btn-floating  waves-effect waves-light  ' },
+									React.createElement(
+										'i',
+										{ className: 'material-icons' },
+										'comment'
+									)
+								)
+							),
+							React.createElement(
+								'div',
+								{ className: 'col s2' },
+								React.createElement(
+									'a',
+									{ onClick: this.toggleComments, title: 'Done', className: 'btn-floating  waves-effect waves-light ' },
+									React.createElement(
+										'i',
+										{ className: 'material-icons' },
+										'done'
+									)
+								)
+							),
+							React.createElement(
+								'div',
+								{ className: 'col s8' },
+								React.createElement(
+									'a',
+									{ onClick: this.toggleComments, title: 'Assign to me', className: 'btn-flat  waves-effect waves-light  ' },
+									'Assign to me'
+								)
+							)
+						)
 					),
 					commentBox
 				)
 			)
 		);
-	},
-	toggleSize: function () {
-		this.setState({
-			isMaximized: !this.state.isMaximized
-		});
 	},
 	onAddComment: function (comment, cb) {
 		var self = this;
@@ -30674,9 +30701,21 @@ var WorkorderBox = React.createClass({
 	getInitialState: function () {
 		return {
 			showCustomer: false,
-			showComments: false,
-			isMaximized: false
+			showComments: false
 		};
+	},
+	customerName: function (w) {
+		var c = w.customer;
+		if (!c) {
+			return "Missing Customer";
+		}
+		var fullName = c.name.first + " " + c.name.last;
+		console.log(c);
+		if (c.company) {
+			return c.company + " (" + fullName + ")";
+		} else {
+			return fullName;
+		}
 	}
 });
 

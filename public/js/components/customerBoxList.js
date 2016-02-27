@@ -5,7 +5,7 @@ var CustomerBoxList = React.createClass({
 	
 	render: function(){
 		var list = this.props.data.map(function(item){
-			return <CustomerBox className="col-xs-12 col-sm-6 col-md-4 customer-box" onSelect={this.customerSelected} key={item._id} data={item}/>
+			return <CustomerBox className="col s12 m6 l4 customer-box" onSelect={this.customerSelected} key={item._id} data={item}/>
 		}.bind(this));
 		return (<div className="customer-box-list row margin-top">
 				{list} 

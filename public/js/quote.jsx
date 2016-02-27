@@ -26,13 +26,13 @@ function getWorkOrder(){
 	});
 	wo.items = items;
 	
-	return wo;
+	return wo; 
 }
 $('.alert .close').on('click', function(e) {
     $(this).parent().addClass("hidden");
 });
 function showError(s){
-	$("#validation").removeClass("hidden");
+	$("#validation").removeClass("hide");
 	$("#validation #text").html(s);
 }
 $("#btn-save").on("click", function(event){
