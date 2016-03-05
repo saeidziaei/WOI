@@ -5,10 +5,9 @@ var CustomerBoxList = require('./customerBoxList.js');
 
 var CustomerLookup = React.createClass({
   render: function() {
-	// var msg = this.state.existingCustomerSelected ? <span className='existing-customer'>Existing Customer!</span> : null;
 	var c = this.state.selectedCustomer;
 	var customerBox = c ? 
-		(<div> <CustomerBox className='customer-box-selected col-xs-12 col-sm-6 col-md-4 customer-box' key={c._id} data={c} onSelect={this.changeSelection}/> 
+		(<div> <CustomerBox className='customer-box-selected col s12 m4' key={c._id} data={c} onSelect={this.changeSelection}/> 
 			<div className='btn btn-default' onClick={this.changeSelection}>Change</div>
 		</div>): null;
 	 
@@ -34,8 +33,12 @@ var CustomerLookup = React.createClass({
 					  ?
 			(<div>
 			<div className="row margin-top">
-				<div className="col-sm-12 col-xs-12">
-					<textarea rows="4" className="form-control" placeholder="Address"/>
+				<div className="col s12">
+					<div className='input-field'>
+						<i className='material-icons prefix'>place</i>
+						<label htmlFor='address'>Address</label>
+						<textarea id='address' className='materialize-textarea' />
+					</div>
 				</div>
 			</div>
 			<em className="margin-top">* New customer will be created.</em>
@@ -86,7 +89,7 @@ var CustomerLookup = React.createClass({
 	return({
 		custdata: null,
 		custdataTemp: null,
-		selectedCustomer: null,
+		selectedCustomer: this.props.selectedCustomer,
 		newCustomer: {name:"", email:"", phone:""}
 	});  
   },

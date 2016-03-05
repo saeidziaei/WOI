@@ -12,7 +12,7 @@ var CustomerBox = React.createClass({
 			<div className={this.props.className } onClick={this.boxClicked} >
 				<div className='card hoverable clickable light-blue lighten-5' >
 					<div className='card-content' >
-						<span className="card-title"><span className='glyphicon glyphicon-user'/>  {displayName}</span>
+						<span className="card-title"><i className="material-icons">account_circle</i>  {displayName}</span>
 						<p>{customer.phone}</p>
 						<p>{customer.email}</p>
 						<p>{customer.billingAddress}</p>

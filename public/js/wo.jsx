@@ -1,15 +1,40 @@
 var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
+var WO = require('./components/wo.js') 
 var CustomerLookup = require('./components/customerLookup.js') 
+var OperatorPicker = require('./components/operatorPicker.js');
 var async = require('async');
 
 $(document).ready(function(){
+	console.log("standardItems", standardItems);
+	ReactDOM.render(
+		<WO standardItems={standardItems} />,
+		document.getElementById('wo-container')
+	);
+	/*
 	ReactDOM.render(
 		<CustomerLookup onChange={customerLookupChange} />,
-		$('#customer-lookup-container')[0]
+		document.getElementById('customer-lookup-container')
 	);
+	
+	// Operators - Only needed after work item has been saved	
+	$.get("/api/operator/list-names", function(result){
+		ReactDOM.render(
+			<OperatorPicker data={result.operators} onSelect={assignToOperator} />,
+			document.getElementById('operator-picker')
+		);
+	});
+	$("#operator-picker").hide();
+	$("#btn-assignto").on('click', function(){ 
+		 $("#operator-picker").fadeToggle("slow")
+	});
+	*/
 });
+
+function assignToOperator(operator){
+	
+}
 var customer;
 function customerLookupChange(c){
 	customer = c;
@@ -80,7 +105,7 @@ $("#btn-save").on("click", function(event){
 	return false;
 });
 
-
+/*
 
 function saveCustomer(customer, cb){
 	$.post("/api/customer/create", customer, function(result){
@@ -109,4 +134,4 @@ function getNameObject(name){
 		last = name.split(' ').slice(-1).join(' ');
 	}
 	return {first: first, last: last};
-}
+}*/

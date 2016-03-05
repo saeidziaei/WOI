@@ -17,7 +17,7 @@ CommentBox = React.createClass({
 			{existingComments}
 			</ul>	
 		</div>);	
-	},
+	}, 
 	commentChange: function(e){
 		this.setState({
 			comment: e.target.value

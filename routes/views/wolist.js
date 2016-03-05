@@ -21,6 +21,6 @@ exports = module.exports = function(req, res) {
 	// });
 	
 	// Render the view
-	view.render('workorder');
+	view.render('wolist');
 	
 };

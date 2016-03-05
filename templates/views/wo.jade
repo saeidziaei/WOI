@@ -1,0 +1,19 @@
+extends ../layouts/default
+
+block intro
+	.container
+		h4.header= locals.title
+		hr
+block content
+	.container
+		#wo-container
+
+		#validation.card-panel.red.lighten-1.hide.white-text
+			i.material-icons.margin-right info
+			span#text Error text
+		
+block js
+	script(src='/js/wo-bundle.js')
+	script.
+		var standardItems = !{JSON.stringify(locals.standardItems)};
+	

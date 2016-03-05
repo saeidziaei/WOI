@@ -14,7 +14,7 @@ var WorkorderBox = React.createClass({
 		act = _.sortBy(act, "createdAt").reverse();
 		var commentBox = this.state.showComments ? <CommentBox onAdd={this.onAddComment} 
 							comments={act} 
-							/> : null;
+							/> : null; 
 		var list = workorder.items.map(function(item, i){
 			return <li key={i}>{item}</li>
 		}.bind(this));
@@ -32,12 +32,12 @@ var WorkorderBox = React.createClass({
 						<p>{new Date(workorder.createdAt).toDateString()}</p>
 						<ul>{list}</ul>
 						<p className="clickable hoverable" onClick={this.toggleCustomer}>
-							<span className='glyphicon glyphicon-user'/> {this.customerName(workorder)}
+							<i className="material-icons">account_circle</i> {this.customerName(workorder)} 
 						</p>
 						{customerBox}
 						<div className="card-action">
 							<div className="row">
-								<div className="col s2"><a onClick={this.toggleComments} title={this.state.showComments ? "Hide Comments" : "Comments"}  className="btn-floating  waves-effect waves-light  "><i className="material-icons">comment</i></a></div>
+								<div className="col s2"><a onClick={this.toggleComments} title={this.state.showComments ? "Hide Comments" : "Comments"}  className="btn-floating  waves-effect waves-light  "><i className="material-icons">chat_bubble_outline</i></a></div>
 								<div className="col s2"><a onClick={this.toggleComments} title="Done"  className="btn-floating  waves-effect waves-light "><i className="material-icons">done</i></a></div>
 								<div className="col s8"><a onClick={this.toggleComments} title="Assign to me"  className="btn-flat  waves-effect waves-light  ">Assign to me</a></div>
 							</div>

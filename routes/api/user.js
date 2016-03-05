@@ -8,6 +8,22 @@ var User = keystone.list('User');
 /**
  * List Users
  */
+
+exports.operatorListNames = function(req, res){
+	var q = keystone.list('User').model
+		.find({"isOperator":true})
+		.limit('100'); // Safety limit only
+	
+	q.exec(function(err, results) {
+		if (err) return res.apiError('database error', err);
+		res.apiResponse({
+			operators: results
+		});
+		
+	});
+		
+}
+
 exports.list = function(req, res) {
 	User.model.find(function(err, items) {
 		

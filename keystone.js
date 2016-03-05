@@ -44,6 +44,8 @@ keystone.set('locals', {
 	editable: keystone.content.editable
 });
 
+
+keystone.set('signin logo', '/images/logo.png');
 // Load your project's Routes
 
 keystone.set('routes', require('./routes'));
