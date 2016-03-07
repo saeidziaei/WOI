@@ -7,8 +7,8 @@ var CustomerLookup = React.createClass({
   render: function() {
 	var c = this.state.selectedCustomer;
 	var customerBox = c ? 
-		(<div> <CustomerBox className='customer-box-selected col s12 m4' key={c._id} data={c} onSelect={this.changeSelection}/> 
-			<div className='btn btn-default' onClick={this.changeSelection}>Change</div>
+		(<div> <CustomerBox className='customer-box-selected col s12 m4' key={c._id} data={c} /> 
+			<div className='btn-flat blue-text small' onClick={this.enableEdit}>Change</div>
 		</div>): null;
 	 
 	var custdata = this.state.custdata;
@@ -67,18 +67,24 @@ var CustomerLookup = React.createClass({
 				</form>
 			</div>)
 			: null;
-	
+	var btnCancelEdit = !c && this.props.selectedCustomer /* that is there is something to go back to */  ? <div className='btn-flat blue-text small' onClick={this.cancelEdit}>Cancel</div> : null;
     return (
 	<div>
 		{customerBox}
 		{newCustomerControls}
 		{newCustomerExtraControls}
 		{matchedCustomers}
+		{btnCancelEdit}
 	</div>);
   },
   newCustomerChanged: function(c){
 	  this.search(c);
-	  this.raiseChange(c);
+	  this.raiseNewCustomer(c);
+  },
+  raiseNewCustomer: function(c){
+	  if (this.props.onNewCustomer){
+		  this.props.onNewCustomer(c);
+	  }
   },
   raiseChange: function(c){
 	  if (this.props.onChange){
@@ -90,7 +96,7 @@ var CustomerLookup = React.createClass({
 		custdata: null,
 		custdataTemp: null,
 		selectedCustomer: this.props.selectedCustomer,
-		newCustomer: {name:"", email:"", phone:""}
+		newCustomer: {name:"", email:"", phone:"", address: ""}
 	});  
   },
   nameChanged: function(e){
@@ -99,8 +105,6 @@ var CustomerLookup = React.createClass({
 	  newCustomer.name = name;
 	  this.setState({newCustomer: newCustomer});
 	  this.newCustomerChanged(newCustomer);
-	  
-	  
   },
   phoneChanged: function(e){
 	  var phone = e.target.value;
@@ -134,11 +138,19 @@ var CustomerLookup = React.createClass({
 	});
 	this.raiseChange(customer);
   },
-  changeSelection: function(){
+  enableEdit: function(){
   	this.setState({
 		  selectedCustomer: null,
 		  custdata: this.state.custdataTemp
 	  });
+  },
+  cancelEdit: function(){
+	  this.setState({ 
+		  		custdata: null,
+				selectedCustomer: this.props.selectedCustomer
+	  });
+	  // so the parent knows no new customer to be created (in case it already has been set to true)
+	  this.raiseNewCustomer(null);
   }
 });
 

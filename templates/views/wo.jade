@@ -13,7 +13,8 @@ block content
 			span#text Error text
 		
 block js
-	script(src='/js/wo-bundle.js')
 	script.
 		var standardItems = !{JSON.stringify(locals.standardItems)};
+		var woObject = !{JSON.stringify(locals.wo || {state: 'DRAFT', items:[]})};
+	script(src='/js/wo-bundle.js')
 	

@@ -19,6 +19,7 @@ exports.browse = function(req, res) {
 	}
 	
 	
+	
 	view.on('init', function(next) {
 		if (req.params.jobNumber) {
 			keystone.list('WorkOrder').model.findOne({ jobNumber: req.params.jobNumber }).exec(function(err, result) {
@@ -53,7 +54,23 @@ exports.byJobNumber =  function(req, res) {
 		console.error(error);	
 	}
 	
-	
+	view.on('init', function(next) {
+		if (req.params.jobNumber) {
+			keystone.list('WorkOrder').model
+				.findOne({ jobNumber: req.params.jobNumber })
+				.populate([
+					{path:"customer", select:"name phone email company billingAddress"}, 
+					{path:"createdBy", select:"name"}
+				])
+				.exec(function(err, result) {
+				locals.wo = result;
+				next(err);
+			});
+		} else {
+			next();
+		}
+		
+	});
 	
 	view.render('wo');
 	

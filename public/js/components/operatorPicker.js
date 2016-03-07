@@ -1,9 +1,10 @@
 var React = require('react');
+var Operator = require('./operator');
 var _ = require('underscore');
 
 var OperatorPicker = React.createClass({
 	render: function() {
-	  var MAX_COUNT = 5;
+	  var MAX_COUNT = 10;
 	  var items = this.state.items;
 	  if (!items){
 		  return <div>No operator found</div>;
@@ -15,10 +16,7 @@ var OperatorPicker = React.createClass({
 			</div> : null;	  
 	  
 	  var ops = items.map(function(item){
-		  return <div className='chip hoverable clickable margin-top margin-right' onClick={this.handleClick.bind(this, item)} key={item._id} >
-		      <img src='/images/profiles/default-op.png'/>
-			  {item.name.first} {item.name.last}
-		  </div>
+		  return <Operator data={item} onClick={this.handleClick.bind(this, item)} key={item._id} />
 	  }.bind(this));
 	 
 	  return (
@@ -30,7 +28,8 @@ var OperatorPicker = React.createClass({
 	  </div>);
   	}	
 	,handleClick: function(item){
-		console.log(item._id);
+		if (this.props.onSelect)
+			this.props.onSelect(item);
   	},
 	getInitialState: function(){
 		return{

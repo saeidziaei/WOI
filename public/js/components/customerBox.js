@@ -10,11 +10,11 @@ var CustomerBox = React.createClass({
 			null;
 		return (
 			<div className={this.props.className } onClick={this.boxClicked} >
-				<div className='card hoverable clickable light-blue lighten-5' >
+				<div className='card hoverable clickable grey lighten-4' >
 					<div className='card-content' >
 						<span className="card-title"><i className="material-icons">account_circle</i>  {displayName}</span>
-						<p>{customer.phone}</p>
-						<p>{customer.email}</p>
+						<p><a href={'tel:'+ customer.phone}> {customer.phone} </a></p>
+						<p><a href={'mailto:' + customer.email}> {customer.email} </a></p>
 						<p>{customer.billingAddress}</p>
 					</div>
 					{moreLink}

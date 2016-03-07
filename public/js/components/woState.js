@@ -2,8 +2,9 @@ const DRAFT             = 'DRAFT';
 const IN_PROGRESS       = 'IN PROGRESS';
 const QUOTE             = 'QUOTE';
 const WAIT_FOR_PART     = 'WAIT FOR PART';
-const WAIT_FOR_CUSTOMER   = 'WAIT FOR CUSTOMER';
+const WAIT_FOR_CUSTOMER = 'WAIT FOR CUSTOMER';
 const COMPLETED         = 'COMPLETED';
+const REJECTED         	= 'REJECTED';
  
 module.exports = {
     DRAFT               : DRAFT,           
@@ -11,5 +12,6 @@ module.exports = {
     QUOTE               : QUOTE,  
     WAIT_FOR_PART       : WAIT_FOR_PART,
     WAIT_FOR_CUSTOMER   : WAIT_FOR_CUSTOMER,
-    COMPLETED           : COMPLETED
+    COMPLETED           : COMPLETED,
+    REJECTED           : REJECTED
 };

@@ -6,7 +6,7 @@ var async = require('async');
  * Create a Work Order
  */
 exports.create = function(req, res) {
-	/*
+	
 	var item = new WorkOrder.model(),
 		data = req.body;
 	
@@ -19,7 +19,7 @@ exports.create = function(req, res) {
 		});
 		
 	});
-	*/
+	/*
 	WorkOrder.model
 		.findOne({"_id": "56d8132897c26a28190d33ec"})
 		.populate([
@@ -35,7 +35,7 @@ exports.create = function(req, res) {
 		});
 		
 		
-	
+	*/
 }
 
 

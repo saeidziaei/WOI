@@ -31698,7 +31698,7 @@ var CustomerBox = React.createClass({
 			{ className: this.props.className, onClick: this.boxClicked },
 			React.createElement(
 				"div",
-				{ className: "card hoverable clickable light-blue lighten-5" },
+				{ className: "card hoverable clickable grey lighten-4" },
 				React.createElement(
 					"div",
 					{ className: "card-content" },
@@ -31716,12 +31716,24 @@ var CustomerBox = React.createClass({
 					React.createElement(
 						"p",
 						null,
-						customer.phone
+						React.createElement(
+							"a",
+							{ href: 'tel:' + customer.phone },
+							" ",
+							customer.phone,
+							" "
+						)
 					),
 					React.createElement(
 						"p",
 						null,
-						customer.email
+						React.createElement(
+							"a",
+							{ href: 'mailto:' + customer.email },
+							" ",
+							customer.email,
+							" "
+						)
 					),
 					React.createElement(
 						"p",
@@ -31790,10 +31802,10 @@ var CustomerLookup = React.createClass({
 			'div',
 			null,
 			' ',
-			React.createElement(CustomerBox, { className: 'customer-box-selected col s12 m4', key: c._id, data: c, onSelect: this.changeSelection }),
+			React.createElement(CustomerBox, { className: 'customer-box-selected col s12 m4', key: c._id, data: c }),
 			React.createElement(
 				'div',
-				{ className: 'btn btn-default', onClick: this.changeSelection },
+				{ className: 'btn-flat blue-text small', onClick: this.enableEdit },
 				'Change'
 			)
 		) : null;
@@ -31894,19 +31906,29 @@ var CustomerLookup = React.createClass({
 				)
 			)
 		) : null;
-
+		var btnCancelEdit = !c && this.props.selectedCustomer /* that is there is something to go back to */ ? React.createElement(
+			'div',
+			{ className: 'btn-flat blue-text small', onClick: this.cancelEdit },
+			'Cancel'
+		) : null;
 		return React.createElement(
 			'div',
 			null,
 			customerBox,
 			newCustomerControls,
 			newCustomerExtraControls,
-			matchedCustomers
+			matchedCustomers,
+			btnCancelEdit
 		);
 	},
 	newCustomerChanged: function (c) {
 		this.search(c);
-		this.raiseChange(c);
+		this.raiseNewCustomer(c);
+	},
+	raiseNewCustomer: function (c) {
+		if (this.props.onNewCustomer) {
+			this.props.onNewCustomer(c);
+		}
 	},
 	raiseChange: function (c) {
 		if (this.props.onChange) {
@@ -31918,7 +31940,7 @@ var CustomerLookup = React.createClass({
 			custdata: null,
 			custdataTemp: null,
 			selectedCustomer: this.props.selectedCustomer,
-			newCustomer: { name: "", email: "", phone: "" }
+			newCustomer: { name: "", email: "", phone: "", address: "" }
 		};
 	},
 	nameChanged: function (e) {
@@ -31960,11 +31982,19 @@ var CustomerLookup = React.createClass({
 		});
 		this.raiseChange(customer);
 	},
-	changeSelection: function () {
+	enableEdit: function () {
 		this.setState({
 			selectedCustomer: null,
 			custdata: this.state.custdataTemp
 		});
+	},
+	cancelEdit: function () {
+		this.setState({
+			custdata: null,
+			selectedCustomer: this.props.selectedCustomer
+		});
+		// so the parent knows no new customer to be created (in case it already has been set to true)
+		this.raiseNewCustomer(null);
 	}
 });
 
@@ -31972,13 +32002,36 @@ module.exports = CustomerLookup;
 
 },{"./customerBox.js":162,"./customerBoxList.js":163,"react":160}],165:[function(require,module,exports){
 var React = require('react');
+
+var Operator = React.createClass({
+	displayName: 'Operator',
+
+	render: function () {
+		var item = this.props.data;
+
+		return React.createElement(
+			'div',
+			{ className: 'chip hoverable clickable margin-top margin-right', onClick: this.props.onClick },
+			React.createElement('img', { src: '/images/profiles/default-op.png' }),
+			item.name.first,
+			' ',
+			item.name.last
+		);
+	}
+});
+
+module.exports = Operator;
+
+},{"react":160}],166:[function(require,module,exports){
+var React = require('react');
+var Operator = require('./operator');
 var _ = require('underscore');
 
 var OperatorPicker = React.createClass({
 	displayName: 'OperatorPicker',
 
 	render: function () {
-		var MAX_COUNT = 5;
+		var MAX_COUNT = 10;
 		var items = this.state.items;
 		if (!items) {
 			return React.createElement(
@@ -31999,14 +32052,7 @@ var OperatorPicker = React.createClass({
 		) : null;
 
 		var ops = items.map(function (item) {
-			return React.createElement(
-				'div',
-				{ className: 'chip hoverable clickable margin-top margin-right', onClick: this.handleClick.bind(this, item), key: item._id },
-				React.createElement('img', { src: '/images/profiles/default-op.png' }),
-				item.name.first,
-				' ',
-				item.name.last
-			);
+			return React.createElement(Operator, { data: item, onClick: this.handleClick.bind(this, item), key: item._id });
 		}.bind(this));
 
 		return React.createElement(
@@ -32021,7 +32067,7 @@ var OperatorPicker = React.createClass({
 		);
 	},
 	handleClick: function (item) {
-		console.log(item._id);
+		if (this.props.onSelect) this.props.onSelect(item);
 	},
 	getInitialState: function () {
 		return {
@@ -32041,10 +32087,12 @@ var OperatorPicker = React.createClass({
 
 module.exports = OperatorPicker;
 
-},{"react":160,"underscore":161}],166:[function(require,module,exports){
+},{"./operator":165,"react":160,"underscore":161}],167:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = require('./customerBox');
 var CustomerLookup = require('./customerLookup');
+var OperatorPicker = require('./operatorPicker');
+var Operator = require('./operator');
 var _ = require("underscore");
 var async = require('async');
 var $ = require('jquery');
@@ -32059,56 +32107,40 @@ var WO = React.createClass({
 		var service = this.renderService(workorder);
 		var actions = this.renderActions(workorder);
 		var activities = this.renderActivities(workorder);
-
+		var stateClass = workorder.state == woState.IN_PROGRESS ? 'green white-text' : workorder.state == woState.REJECTED ? 'red white-text' : '';
 		return React.createElement(
 			'div',
 			null,
 			React.createElement(
 				'h3',
 				null,
-				workorder.jobNumber ? 'Job# ' + workorder.jobNumber : 'Create New',
+				workorder.jobNumber ? 'Job# ' + workorder.jobNumber : 'New',
 				' ',
 				React.createElement(
 					'div',
-					{ className: 'chip' },
+					{ className: stateClass + ' chip' },
 					workorder.state
 				)
 			),
 			customer,
 			service,
 			actions,
-			activities,
-			React.createElement(
-				'div',
-				{ className: 'btn', onClick: this.save },
-				'Save'
-			)
+			activities
 		);
 	},
 	renderCustomer: function (w) {
 		var c = w.customer;
-		var currentCustomer = w.editable ? null /*coz we will show the lookup if it is editable*/ : c ? React.createElement(
-			'div',
-			null,
-			React.createElement(CustomerBox, { className: 'customer-box-selected col s12 m4', key: c._id, data: c }),
-			React.createElement(
-				'div',
-				{ className: 'btn-flat orange-text', onClick: this.changeSelection },
-				'Change'
-			)
-		) : null;
-
-		var lookup = w.editable ? React.createElement(CustomerLookup, { selectedCustomer: c, onChange: this.customerLookupChange }) : null;
+		var key = c ? c._id : -1;
+		var lookup = React.createElement(CustomerLookup, { key: key, selectedCustomer: c, onChange: this.customerLookupChange, onNewCustomer: this.newCustomerChange });
 
 		return React.createElement(
 			'div',
 			{ className: 'customer-section' },
 			React.createElement(
-				'h3',
+				'h4',
 				{ className: 'header' },
 				'Customer'
 			),
-			currentCustomer,
 			lookup
 		);
 	},
@@ -32116,11 +32148,15 @@ var WO = React.createClass({
 		var w = this.state.workorder;
 		w.customer = c;
 		this.setState({
-			workorder: w
+			workorder: w,
+			createNewCustomer: false
 		});
 	},
+	newCustomerChange: function (c) {
+		this.setState({ newCustomer: c, createNewCustomer: c != null });
+	},
 	renderService: function (w) {
-		var description = w.editable ? React.createElement(
+		var description = w.state == woState.DRAFT || this.state.editDescription ? React.createElement(
 			'div',
 			{ className: 'input-field' },
 			React.createElement(
@@ -32128,49 +32164,163 @@ var WO = React.createClass({
 				{ className: 'material-icons prefix' },
 				'mode_edit'
 			),
-			React.createElement('textarea', { id: 'description', onChange: this.handleDescriptionChange, className: 'materialize-textarea', value: w.description }),
+			React.createElement('textarea', { id: 'description', onChange: this.handleDescriptionChange, onBlur: this.descriptionChanged, className: 'materialize-textarea service-description', value: w.description }),
 			React.createElement(
 				'label',
 				{ htmlFor: 'description', className: w.description ? 'active' : '' },
 				'Description of service'
 			)
 		) : React.createElement(
-			'h2',
+			'div',
 			null,
-			w.description
+			React.createElement(
+				'h5',
+				null,
+				'Description'
+			),
+			React.createElement(
+				'div',
+				{ className: 'grey-text  service-description' },
+				w.description
+			),
+			React.createElement(
+				'div',
+				{ className: 'btn-flat blue-text small', onClick: this.makeEditable.bind(this, 'DESCRIPTION') },
+				'Change'
+			)
 		);
 
-		var serviceItems = this.state.standardItems ? this.state.standardItems.map(function (item, item_i) {
-			var id = 'item' + item_i;
-			var checked = w.items && _.contains(w.items, item) ? 'checked' : '';
+		var serviceItems = null;
+		if (w.state == woState.DRAFT || this.state.editItems) {
+			// display checkboxes
+			var items = this.state.standardItems ? this.state.standardItems.map(function (item, item_i) {
+				var id = 'item' + item_i;
+				var checked = w.items && _.contains(w.items, item) ? 'checked' : '';
 
-			return React.createElement(
+				return React.createElement(
+					'div',
+					{ className: 'col s12 m6', key: id },
+					React.createElement('input', { type: 'checkbox', id: id, checked: checked, onChange: this.handleServiceItemChange.bind(this, item) }),
+					React.createElement(
+						'label',
+						{ htmlFor: id },
+						item
+					)
+				);
+			}.bind(this)) : null;
+			var btnSave = w.state != woState.DRAFT ? React.createElement(
 				'div',
-				{ className: 'col s12 m6', key: id },
-				React.createElement('input', { type: 'checkbox', id: id, checked: checked, onChange: this.handleServiceItemChange.bind(this, item) }),
+				{ className: 'btn-floating ', onClick: this.itemsChanged, title: 'Save' },
 				React.createElement(
-					'label',
-					{ htmlFor: id },
-					item
+					'i',
+					{ className: 'material-icons white green-text' },
+					'done'
+				)
+			) : null;
+
+			serviceItems = React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'div',
+					{ className: 'row' },
+					items
+				),
+				React.createElement(
+					'div',
+					{ className: 'row' },
+					btnSave
 				)
 			);
-		}.bind(this)) : null;
+		} else {
+			items = w.items && w.items.length ? w.items.map(function (item, item_i) {
+				var id = 'item' + item_i;
+				return React.createElement(
+					'li',
+					{ key: id, className: 'collection-item' },
+					' ',
+					item,
+					' '
+				);
+			}) : React.createElement(
+				'li',
+				{ className: 'collection-item' },
+				React.createElement(
+					'em',
+					null,
+					'no standard items assigned'
+				)
+			);
+
+			serviceItems = React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'ul',
+					{ className: 'collection with-header' },
+					React.createElement(
+						'li',
+						{ className: 'collection-header' },
+						React.createElement(
+							'h5',
+							null,
+							'Service Items'
+						)
+					),
+					items,
+					React.createElement(
+						'li',
+						{ className: 'collection-item' },
+						React.createElement(
+							'div',
+							{ className: 'btn-flat blue-text small', onClick: this.makeEditable.bind(this, 'ITEMS') },
+							'Change'
+						)
+					)
+				)
+			);
+		}
 
 		return React.createElement(
 			'div',
 			{ className: 'service-section' },
 			React.createElement(
-				'h3',
+				'h4',
 				{ className: 'header' },
 				'Service'
 			),
 			description,
-			React.createElement(
-				'div',
-				{ className: 'row' },
-				serviceItems
-			)
+			serviceItems
 		);
+	},
+	descriptionChanged: function () {
+		this.updateDatabase('DESCRIPTION');
+		this.setState({ editDescription: false });
+	},
+	itemsChanged: function () {
+		this.setState({ editItems: false });
+	},
+	updateDatabase: function (part) {
+		if (this.state.workorder.state == woState.DRAFT) return;
+		alert('Update database ' + part);
+		switch (part) {
+			case 'DESCRIPTION':
+				break;
+
+			case 'ITEMS':
+				break;
+		}
+	},
+	makeEditable: function (part) {
+		switch (part) {
+			case 'DESCRIPTION':
+				this.setState({ editDescription: true });
+				break;
+
+			case 'ITEMS':
+				this.setState({ editItems: true });
+				break;
+		}
 	},
 	handleServiceItemChange: function (item) {
 		w = this.state.workorder;
@@ -32195,7 +32345,7 @@ var WO = React.createClass({
 			'div',
 			{ className: 'activities-section' },
 			React.createElement(
-				'h3',
+				'h4',
 				{ className: 'header' },
 				'Activities'
 			),
@@ -32209,28 +32359,34 @@ var WO = React.createClass({
 	showError(msg) {
 		alert(msg);
 	},
-	save: function () {
+	create: function () {
 		try {
 			var w = this.state.workorder;
-			// console.log(w);
 
-			if (!w.customer) {
-				showError("Customer is missing.");
-				return;
+			if (this.state.createNewCustomer) {
+				var newCustomer = this.state.newCustomer;
+				if (!newCustomer) {
+					showError("Customer is missing.");
+					return;
+				}
+				if (!newCustomer.name) {
+					showError("Customer name is required.");
+					return;
+				}
+				if (typeof newCustomer.name != "object") {
+					newCustomer.name = this.getNameObject(newCustomer.name);
+				}
 			}
 			if (!w.description && !w.items.length) {
 				showError("What work needs to be done?");
 				return;
 			}
 			var dbCustomer = w.customer;
-			if (typeof dbCustomer.name != "object") {
-				dbCustomer.name = getNameObject(customer.name);
-			}
 			var self = this;
 			async.series([function (cb) {
-				if (!dbCustomer._id) {
-					self.saveCustomer(dbCustomer, function (saved) {
-						console.log("customer saved", dbCustomer, saved);
+				if (self.state.createNewCustomer) {
+					self.saveCustomer(newCustomer, function (saved) {
+						console.log("customer saved: ", dbCustomer, saved);
 						dbCustomer._id = saved.user._id;
 						cb();
 					});
@@ -32251,7 +32407,6 @@ var WO = React.createClass({
 		}
 	},
 	renderActions: function (w) {
-
 		var btnCreate = !w.jobNumber ? React.createElement(
 			'div',
 			{ className: 'btn', onClick: this.create },
@@ -32286,11 +32441,27 @@ var WO = React.createClass({
 			{ className: 'btn grey lighten-3 blue-text', onClick: this.showActionDetails.bind(this, 'WAIT FOR CUSTOMER') },
 			'Wait For Customer'
 		) : null;
-		var btnAssignTo = w.state != woState.DRAFT ? React.createElement(
+		var assignee = w.assignee ? React.createElement(
+			'div',
+			null,
+			React.createElement(
+				'span',
+				null,
+				'Assigned to '
+			),
+			React.createElement(Operator, { data: w.assignee }),
+			React.createElement('br', null),
+			React.createElement(
+				'div',
+				{ className: 'btn-flat blue-text small', onClick: this.assignTo },
+				'Change'
+			)
+		) : w.state != woState.DRAFT ? React.createElement(
 			'div',
 			{ className: 'btn', onClick: this.assignTo },
-			'Assign To'
+			'Assign To ...'
 		) : null;
+		var operatorPicker = this.state.showOperatorPicker ? React.createElement(OperatorPicker, { data: this.state.operators, onSelect: this.assigneeSelected }) : null;
 		var btnComplete = w.state == woState.IN_PROGRESS ? React.createElement(
 			'div',
 			{ className: 'btn green lighten-1', onClick: this.complete },
@@ -32329,16 +32500,37 @@ var WO = React.createClass({
 			'div',
 			{ className: 'section-actions' },
 			React.createElement('hr', null),
+			assignee,
 			btnCreate,
 			btnStart,
 			btnReject,
 			btnWaitForPart,
 			btnWaitForCustomer,
-			btnAssignTo,
+			operatorPicker,
 			btnReopen,
 			btnComplete,
 			actionDetails
 		);
+	},
+	assignTo: function () {
+		if (this.state.operators) {
+			this.setState({ showOperatorPicker: true });
+		} else {
+			$.get("/api/operator/list-names", function (result) {
+				this.setState({
+					showOperatorPicker: true,
+					operators: result.operators
+				});
+			}.bind(this));
+		}
+	},
+	assigneeSelected: function (operator) {
+		var w = this.state.workorder;
+		w.assignee = operator;
+		this.setState({
+			showOperatorPicker: false,
+			workorder: w
+		});
 	},
 	actionNoteChanged: function (e) {
 		this.setState({
@@ -32420,21 +32612,27 @@ var WO = React.createClass({
 	},
 	getInitialState: function () {
 		return {
-			workorder: this.props.data || { id: 0, state: woState.IN_PROGRESS, editable: true, items: ['c'], description: 'Please do a lot of work', customer: { _id: 1, name: { first: 'Ali', last: 'Akber' }, phone: '1234', email: 'a@a.a' } },
-			standardItems: this.props.standardItems || ['a', 'b', 'c', 'd']
+			workorder: this.props.data || { id: 0, state: woState.DRAFT, items: ['c'], description: 'Please do a lot of work', customer: { _id: 1, name: { first: 'Ali', last: 'Akber' }, phone: '1234', email: 'a@a.a' } },
+			standardItems: this.props.standardItems || ['a', 'b', 'c', 'd'],
+			newCustomer: null,
+			createNewCustomer: false,
+			editDescription: false,
+			editItems: false,
+			showOperatorPicker: false
 		};
 	}
 });
 
 module.exports = WO;
 
-},{"./customerBox":162,"./customerLookup":164,"./woState":167,"async":2,"jquery":3,"react":160,"underscore":161}],167:[function(require,module,exports){
+},{"./customerBox":162,"./customerLookup":164,"./operator":165,"./operatorPicker":166,"./woState":168,"async":2,"jquery":3,"react":160,"underscore":161}],168:[function(require,module,exports){
 const DRAFT = 'DRAFT';
 const IN_PROGRESS = 'IN PROGRESS';
 const QUOTE = 'QUOTE';
 const WAIT_FOR_PART = 'WAIT FOR PART';
 const WAIT_FOR_CUSTOMER = 'WAIT FOR CUSTOMER';
 const COMPLETED = 'COMPLETED';
+const REJECTED = 'REJECTED';
 
 module.exports = {
     DRAFT: DRAFT,
@@ -32442,10 +32640,11 @@ module.exports = {
     QUOTE: QUOTE,
     WAIT_FOR_PART: WAIT_FOR_PART,
     WAIT_FOR_CUSTOMER: WAIT_FOR_CUSTOMER,
-    COMPLETED: COMPLETED
+    COMPLETED: COMPLETED,
+    REJECTED: REJECTED
 };
 
-},{}],168:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -32455,8 +32654,7 @@ var OperatorPicker = require('./components/operatorPicker.js');
 var async = require('async');
 
 $(document).ready(function () {
-	console.log("standardItems", standardItems);
-	ReactDOM.render(React.createElement(WO, { standardItems: standardItems }), document.getElementById('wo-container'));
+	ReactDOM.render(React.createElement(WO, { standardItems: standardItems, data: woObject }), document.getElementById('wo-container'));
 	/*
  ReactDOM.render(
  	<CustomerLookup onChange={customerLookupChange} />,
@@ -32478,101 +32676,5 @@ $(document).ready(function () {
 });
 
 function assignToOperator(operator) {}
-var customer;
-function customerLookupChange(c) {
-	customer = c;
-}
-function getWorkOrder() {
-	var wo = {
-		"description": $("#description").val().trim()
-	};
-	var items = [];
-	$(".service-item").each(function (i, c) {
-		if (c.checked) {
-			items.push($(c).siblings("span").text());
-		}
-	});
-	wo.items = items;
 
-	return wo;
-}
-$('.alert .close').on('click', function (e) {
-	$(this).parent().addClass("hidden");
-});
-function showError(s) {
-	$("#validation").removeClass("hide");
-	$("#validation #text").html(s);
-}
-$("#btn-save").on("click", function (event) {
-	event.preventDefault();
-
-	try {
-		if (!customer) {
-			showError("Customer is missing.");
-			return;
-		}
-		var wo = getWorkOrder();
-		if (!wo.description && !wo.items.length) {
-			showError("What work needs to be done?");
-			return;
-		}
-		var dbCustomer = customer;
-		if (typeof dbCustomer.name != "object") {
-			dbCustomer.name = getNameObject(customer.name);
-		}
-		async.series([function (cb) {
-			if (!dbCustomer._id) {
-				saveCustomer(dbCustomer, function (saved) {
-					console.log("customer saved", dbCustomer, saved);
-					dbCustomer._id = saved.user._id;
-					cb();
-				});
-			} else {
-				cb();
-			}
-		}, function () {
-			wo.customer = dbCustomer._id;
-			saveWorkOrder(wo, function (result) {
-				alert("All done!");
-				console.log("/workorder/save", result);
-			});
-		}]);
-	} catch (e) {
-		console.log(e);
-		alert("Ooops! someting is not working.");
-	}
-	return false;
-});
-
-/*
-
-function saveCustomer(customer, cb){
-	$.post("/api/customer/create", customer, function(result){
-		console.log("/customer/save", result);
-		cb(result);
-	});
-}
-
-function saveWorkOrder(workOrder, cb){
-	$.post("/api/workorder/create", workOrder, function(result){
-		cb(result);
-	});
-}
-
-function getNameObject(name){
-	if (!name) return null;
-	
-	var first, last, delimiterIndex = name.indexOf("-");
-	if (delimiterIndex != -1){
-		first = name.substring(0, delimiterIndex - 1).trim();
-		last = name.substring(delimiterIndex + 1).trim();
-	} else {
-		// 'Paul Steve Panakkal'.split(' ').slice(0, -1).join(' '); // returns "Paul Steve"
-		// 'Paul Steve Panakkal'.split(' ').slice(-1).join(' '); // returns "Panakkal"
-		first = name.split(' ').slice(0, -1).join(' ');
-		last = name.split(' ').slice(-1).join(' ');
-	}
-	return {first: first, last: last};
-}*/
-
-},{"./components/customerLookup.js":164,"./components/operatorPicker.js":165,"./components/wo.js":166,"async":2,"jquery":3,"react":160,"react-dom":4}]},{},[168]);
+},{"./components/customerLookup.js":164,"./components/operatorPicker.js":166,"./components/wo.js":167,"async":2,"jquery":3,"react":160,"react-dom":4}]},{},[169]);
