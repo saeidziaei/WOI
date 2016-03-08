@@ -3,26 +3,59 @@ var CustomerBox = require('./customerBox');
 var CustomerLookup = require('./customerLookup');
 var OperatorPicker = require('./operatorPicker');
 var Operator = require('./operator');
+var swal = require('sweetalert');
+var numeral = require('numeral');
+
 var _ = require("underscore");
 var async = require('async');
 var $ = require('jquery');
-var woState = require('./woState');
+var woStatus = require('./woStatus');
 
 var WO = React.createClass({
+	
+	
 	render: function(){
+		
 		var workorder = this.state.workorder;
+
+		var jobHeader = this.renderJobHeader(workorder);
 		var customer = this.renderCustomer(workorder);	
 		var service = this.renderService(workorder);
 		var actions = this.renderActions(workorder);
 		var activities = this.renderActivities(workorder);
-		var stateClass = workorder.state == woState.IN_PROGRESS ? 'green white-text' : 
-						 workorder.state == woState.REJECTED ? 'red white-text' : '';
+		
 		return <div>
-		<h3>{workorder.jobNumber ? 'Job# ' + workorder.jobNumber : 'New'} <div className={stateClass + ' chip'}>{workorder.state}</div></h3>
+		 
+			{jobHeader}
 			{customer}
 			{service}
 			{actions}
 			{activities}
+		</div>
+	},
+	renderJobHeader: function(w){
+		var priceInfo = this.renderPriceInfo(w);
+		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' : 
+						 w.status == woStatus.REJECTED ? 'red white-text' : '';
+		return <div className='row '>
+			<div className='col s12 m3 big-font'>
+				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={statusClass + ' chip'}>{w.status}</div>
+			</div>
+			
+			<div className='col s12 m3 margin-top grey lighten-5'>
+				<div className="switch margin">
+					<label>
+					In Store
+					<input type="checkbox"/>
+					<span className="lever"></span>
+					On Site
+					</label>
+  				</div>
+  			</div>
+
+			<div className='col s12 m6'>
+				{priceInfo}
+			</div>
 		</div>
 	},
 	renderCustomer: function(w){
@@ -46,24 +79,61 @@ var WO = React.createClass({
 	newCustomerChange : function(c){
 		this.setState({	newCustomer: c, createNewCustomer: c != null });
 	},
+	renderPriceInfo: function(w){
+		var price = w.status == woStatus.DRAFT || this.state.edit['PRICE'] ? (<div >
+			<div className="input-field left">
+    	      <i className="material-icons prefix">attach_moneyu</i> 
+        	  <input id="price-edit" type="text" className=" price" onChange={this.priceChange} value={w.price}/>
+          	  <label htmlFor="price-edit" className="active">Price</label>
+	       </div>
+	       <div className='btn-floating ' onClick={this.update.bind(this, 'PRICE')} title='Save'><i className='material-icons white green-text'>done</i></div>
+		   <div className='clearfix'/>
+		</div>) :
+		(<div >
+			<div className="input-field left">
+    	      <i className="material-icons prefix">attach_moneyu</i> 
+          	  <label htmlFor="price" className="active">Price</label>
+        	  <input disabled id="price" type="text" className=" price" value={w.price ? numeral(w.price).format('0,0.00') : w.price}/>
+	       </div>
+
+			   <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'PRICE')}>Change</div>
+			   <div className='clearfix'/>
+		 </div>)  
+		;
+		
+		return price;
+	},
+	priceChange: function(e){
+		var w = this.state.workorder;
+		w.price = e.target.value;
+		this.setState({
+			workorder: w
+		});
+	},
 	renderService: function(w){
-		var description = w.state == woState.DRAFT || this.state.editDescription ?  (
-			<div className='input-field'>
-				<i className='material-icons prefix'>mode_edit</i>
-				<textarea  id='description' onChange={this.handleDescriptionChange} onBlur={this.descriptionChanged} className='materialize-textarea service-description' value={w.description} />
-				<label htmlFor='description' className={w.description ? 'active' : ''}>Description of service</label>
+
+		var description = w.status == woStatus.DRAFT || this.state.edit['DESCRIPTION'] ?  (
+			<div className='row'>
+				<div className='input-field left col s8'>
+					<i className='material-icons prefix'>mode_edit</i>
+					<textarea  id='description' onChange={this.handleDescriptionChange} className='materialize-textarea service-description' value={w.description} />
+					<label htmlFor='description' className={w.description ? 'active' : ''}>Description of service</label>
+				</div>
+				<div className='btn-floating ' onClick={this.update.bind(this, 'DESCRIPTION')} title='Save'><i className='material-icons white green-text'>done</i></div>
+				<div className='clearfix'/>			
 			</div>
 		) : (<div> 
 				<h5>Description</h5>
-				<div className='grey-text  service-description'>{w.description}</div>
-				<div className='btn-flat blue-text small' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>
+				<div className='grey-text  service-description left'>{w.description}</div>
+				<div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>
+				<div className='clearfix'/>
 			</div>)			
 				;
 
 		var serviceItems = null;
-		if (w.state == woState.DRAFT || this.state.editItems)
+		if (w.status == woStatus.DRAFT || this.state.edit['ITEMS'])
 		{ // display checkboxes
-			var items = this.state.standardItems ? this.state.standardItems.map(function(item, item_i){
+			var items = this.props.standardItems ? this.props.standardItems.map(function(item, item_i){
 				var id = 'item' + item_i;
 				var checked = w.items && _.contains(w.items, item)  ? 'checked' : '';
 
@@ -72,8 +142,8 @@ var WO = React.createClass({
 					<label htmlFor={id}>{item}</label>
 				</div>
 			}.bind(this)) : null;
-			var btnSave = w.state != woState.DRAFT ?
-				 <div className='btn-floating ' onClick={this.itemsChanged} title='Save'><i className='material-icons white green-text'>done</i></div>
+			var btnSave = w.status != woStatus.DRAFT ?
+				 <div className='btn-floating ' onClick={this.update.bind(this, 'ITEMS')} title='Save'><i className='material-icons white green-text'>done</i></div>
 				 :null;
 			
 			serviceItems =  <div>
@@ -109,35 +179,44 @@ var WO = React.createClass({
 				{serviceItems}
 			</div>)
 	},
-	descriptionChanged: function(){
-		this.updateDatabase('DESCRIPTION');
-		this.setState({editDescription: false});
-	},
-	itemsChanged: function(){
-		this.setState({editItems: false});
-	},
 	updateDatabase : function(part){
-		if (this.state.workorder.state == woState.DRAFT)
+		var w = this.state.workorder; 
+		if (w.status == woStatus.DRAFT)
 			return;
 		alert('Update database ' + part);
 		switch (part){
 			case 'DESCRIPTION':
+				if (this.state.initialValues.description != w.description){
+					$.post('/api/workorder/updateDescription', {_id: w._id, description: w.description}, this.serverUpdate);
+				};
+			
 				break;
 				
 			case 'ITEMS':
 				break;
+
+			case 'PRICE':
+				if (this.state.initialValues.price != w.price)
+					$.post('/api/workorder/updatePrice', {_id: w._id, price: w.price}, this.serverUpdate);
+				break;
+			
 		}
 	},
+	update: function(part){
+		this.updateDatabase(part);
+		var edit = [];
+		// or if you want multiple editable fields:
+		// var edit = this.state.edit;
+		// edit[part] = false;
+		this.setState({edit: edit});
+	},
 	makeEditable: function(part){
-		switch (part){
-			case 'DESCRIPTION':
-				this.setState({editDescription: true});
-				break;
-				
-			case 'ITEMS':
-				this.setState({editItems: true});
-				break;
-		}
+		var edit = [];
+		edit[part] = true;
+		// or if you want multiple editable fields:
+		// var edit = this.state.edit;
+		// edit[part] = true;
+		this.setState({edit: edit});
 	},
 	handleServiceItemChange: function(item){
 		w = this.state.workorder;
@@ -165,8 +244,8 @@ var WO = React.createClass({
 			</div>
 		</div>)
 	},
-	showError(msg){
-		alert(msg);	
+	showError: function(msg){
+		swal(msg, "", "error");	
 	},
 	create: function(){
 		try{
@@ -175,19 +254,24 @@ var WO = React.createClass({
 			if (this.state.createNewCustomer){
 				var newCustomer = this.state.newCustomer; 
 				if (!newCustomer){
-					showError("Customer is missing.");
+					this.showError("Customer is missing.");
 					return;
 				}
 				if (!newCustomer.name){
-					showError("Customer name is required.");
+					this.showError("Customer name is required.");
 					return;
 				}
 				if (typeof newCustomer.name != "object"){
 					newCustomer.name = this.getNameObject(newCustomer.name);
 				}
+			} else {
+				if (!w.customer){
+					this.showError("Customer is missing.");
+					return;
+				}
 			}
 			if (!w.description && !w.items.length){
-				showError("What work needs to be done?");
+				this.showError("What work needs to be done?");
 				return;
 			}
 			var dbCustomer = w.customer;
@@ -207,7 +291,7 @@ var WO = React.createClass({
 				function(){
 					w.customer = dbCustomer._id;
 					self.saveWorkOrder(w, function(result){
-						alert("All done!");
+						swal("Job Number " + result.workorder.jobNumber, "New workorder saved.", "success");
 						console.log("/workorder/save", result);
 						self.setState({workorder: result.workorder});
 					});
@@ -221,26 +305,26 @@ var WO = React.createClass({
 	},
 	renderActions: function(w){
 		var btnCreate = !w.jobNumber ? <div className='btn' onClick={this.create}>Create</div> : null;
-		var btnStart  = w.state == woState.QUOTE || w.state == woState.WAIT_FOR_PART || w.state == woState.WAIT_FOR_CUSTOMER ?
+		var btnStart  = w.status == woStatus.QUOTE || w.status == woStatus.WAIT_FOR_PART || w.status == woStatus.WAIT_FOR_CUSTOMER ?
 				<div>
 					<div className='btn' onClick={this.startProgress}>Start Progress</div>
 					<em>* Customer has accepted the quote</em>
 				</div> : null;
-		var btnReject  = w.state == woState.QUOTE ?  <div className='btn red lighten-1' onClick={this.reject}>Reject</div> : null;
-		var btnWaitForPart = w.state == woState.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text' onClick={this.showActionDetails.bind(this, 'WAIT FOR PART')}>Wait For Part</div> : null;
-		var btnWaitForCustomer = w.state == woState.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text'  onClick={this.showActionDetails.bind(this, 'WAIT FOR CUSTOMER')}>Wait For Customer</div> : null;
+		var btnReject  = w.status == woStatus.QUOTE ?  <div className='btn red lighten-1' onClick={this.reject}>Reject</div> : null;
+		var btnWaitForPart = w.status == woStatus.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text' onClick={this.showActionDetails.bind(this, 'WAIT FOR PART')}>Wait For Part</div> : null;
+		var btnWaitForCustomer = w.status == woStatus.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text'  onClick={this.showActionDetails.bind(this, 'WAIT FOR CUSTOMER')}>Wait For Customer</div> : null;
 		var assignee = w.assignee ? <div>
 										 <span>Assigned to </span>
 										 <Operator data={w.assignee}  />
 										 <br/>
 										 <div className='btn-flat blue-text small' onClick={this.assignTo}>Change</div>
 									</div> : 
-									w.state != woState.DRAFT ? 
+									w.status != woStatus.DRAFT ? 
 									<div className='btn' onClick={this.assignTo}>Assign To ...</div> 
 									: null;
 		var operatorPicker = this.state.showOperatorPicker ? <OperatorPicker data={this.state.operators} onSelect={this.assigneeSelected} /> : null;
-		var btnComplete = w.state == woState.IN_PROGRESS ? <div className='btn green lighten-1'  onClick={this.complete}>Complete</div> : null;
-		var btnReopen = w.state == woState.COMPLETED ? <div className='btn'             onClick={this.showActionDetails.bind(this, 'REOPEN')}>Re Open</div> : null;
+		var btnComplete = w.status == woStatus.IN_PROGRESS ? <div className='btn green lighten-1'  onClick={this.complete}>Complete</div> : null;
+		var btnReopen = w.status == woStatus.COMPLETED ? <div className='btn'             onClick={this.showActionDetails.bind(this, 'REOPEN')}>Re Open</div> : null;
 		var actionDetails = this.state.showActionDetail ?
 					(<div className='row'>
 						<div className='input-field col s12'>
@@ -366,10 +450,15 @@ var WO = React.createClass({
 	},
 	getInitialState : function(){
 		return {
-			workorder: this.props.data || {id : 0, state: woState.DRAFT, items:['c'], description:'Please do a lot of work', customer:{_id:1, name:{first:'Ali', last:'Akber'}, phone:'1234', email:'a@a.a'}},
-			standardItems: this.props.standardItems || ['a', 'b', 'c', 'd'],
+			initialValues: {
+				price: this.props.data.price,
+				description: this.props.data.description,
+				items: this.props.data.items
+			},
+			workorder: this.props.data,
 			newCustomer: null,
 			createNewCustomer: false,
+			edit: [],
 			editDescription: false,
 			editItems: false,
 			showOperatorPicker: false

@@ -27,6 +27,7 @@ exports.browse = function(req, res) {
 				next(err);
 			});
 		} else {
+			locals.wo = {status: 'DRAFT', items:[]};
 			next();
 		}
 		
@@ -67,11 +68,11 @@ exports.byJobNumber =  function(req, res) {
 				next(err);
 			});
 		} else {
+			locals.wo = {status: 'DRAFT', items:[]};
 			next();
 		}
 		
 	});
-	
 	view.render('wo');
 	
 };

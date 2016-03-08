@@ -2,11 +2,11 @@ extends ../layouts/default
 
 block intro
 	.container
-		h4.header= locals.title
-		hr
+		// h4.header= locals.title
+		// hr
 block content
 	.container
-		#wo-container
+		#wo-container.margin-top
 
 		#validation.card-panel.red.lighten-1.hide.white-text
 			i.material-icons.margin-right info
@@ -15,6 +15,6 @@ block content
 block js
 	script.
 		var standardItems = !{JSON.stringify(locals.standardItems)};
-		var woObject = !{JSON.stringify(locals.wo || {state: 'DRAFT', items:[]})};
+		var woObject = !{JSON.stringify(locals.wo)};
 	script(src='/js/wo-bundle.js')
 	

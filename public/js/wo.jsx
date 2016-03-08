@@ -7,6 +7,7 @@ var OperatorPicker = require('./components/operatorPicker.js');
 var async = require('async');
 
 $(document).ready(function(){
+	
 	ReactDOM.render(
 		<WO standardItems={standardItems} data={woObject} />,
 		document.getElementById('wo-container')

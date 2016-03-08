@@ -10,7 +10,10 @@ exports.create = function(req, res) {
 	var item = new WorkOrder.model(),
 		data = req.body;
 	
-	item.getUpdateHandler(req).process(data, function(err) {
+	var updater = item.getUpdateHandler(req);
+	data.status = 'QUOTE';
+	 
+	updater.process(data, function(err) {
 		
 		if (err) return res.apiError('error', err);
 		
@@ -19,6 +22,7 @@ exports.create = function(req, res) {
 		});
 		
 	});
+	
 	/*
 	WorkOrder.model
 		.findOne({"_id": "56d8132897c26a28190d33ec"})
@@ -37,8 +41,40 @@ exports.create = function(req, res) {
 		
 	*/
 }
+insertActitivy = function(){
+	console.log("NEW ACTIVITY");
+}
+exports.updateDescription = function(req, res){
+	data = req.body;
+	
+	WorkOrder.model.findById(data._id, function(err, w){
+		if (err) return res.apiError('database read error', err);
+		w.set({
+			description: data.description
+			});
+		w.save(function(err){
+			if (err) return res.apiError('database update error', err);
+			insertActitivy();
+			res.apiResponse({workorder: w});
+		})
+	});
+}
 
-
+exports.updatePrice = function(req, res){
+	data = req.body;
+	
+	WorkOrder.model.findById(data._id, function(err, w){
+		if (err) return res.apiError('database read error', err);
+		w.set({
+			price: data.price
+			});
+		w.save(function(err){
+			if (err) return res.apiError('database update error', err);
+			insertActitivy();
+			res.apiResponse({workorder: w});
+		})
+	});
+}
 
 /**
  * List Posts
