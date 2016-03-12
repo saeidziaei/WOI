@@ -61,6 +61,7 @@ exports.byJobNumber =  function(req, res) {
 				.findOne({ jobNumber: req.params.jobNumber })
 				.populate([
 					{path:"customer", select:"name phone email company billingAddress"}, 
+					{path:"assignee", select:"name"}, 
 					{path:"createdBy", select:"name"}
 				])
 				.exec(function(err, result) {

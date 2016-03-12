@@ -1,7 +1,7 @@
 var keystone = require('keystone');
 var WorkOrder = keystone.list('WorkOrder');
+var WorkOrderActivity = keystone.list('WorkOrderActivity');
 var async = require('async');
-
 /**
  * Create a Work Order
  */
@@ -41,37 +41,87 @@ exports.create = function(req, res) {
 		
 	*/
 }
-insertActitivy = function(){
-	console.log("NEW ACTIVITY");
-}
-exports.updateDescription = function(req, res){
-	data = req.body;
-	
-	WorkOrder.model.findById(data._id, function(err, w){
-		if (err) return res.apiError('database read error', err);
-		w.set({
-			description: data.description
-			});
-		w.save(function(err){
-			if (err) return res.apiError('database update error', err);
-			insertActitivy();
-			res.apiResponse({workorder: w});
-		})
+function createAssignmentActivity(activity){
+	return new WorkOrderActivity.model({
+		activityType: activity.activityType,
+		assignedTo: activity.assignedTo,
+		comment: "Changed Assignee"
 	});
 }
+function createModifyActivity(activity){
+	return new WorkOrderActivity.model({
+		activityType: activity.activityType,
+		modify: {
+			field: activity.field,
+			fromValue: activity.fromValue,
+			toValue: activity.toValue
+		},
+		comment: "Updated " + activity.field
+	});
+}
+function insertActitivy (activity, next){
+	var item = activity.activityType == 'modify' ? createModifyActivity(activity) : 
+			   activity.activityType == 'assignment' ? createAssignmentActivity(activity) : null;
 
-exports.updatePrice = function(req, res){
+    if (!item) next(null);
+	
+	// This is needed to maintain createdBy field from 'track'
+	item._req_user = activity.user;
+	
+	item.workorder = activity.workorder;
+	
+	item.save(function(err){
+		next(err);
+	})
+}
+
+exports.updateField = function(req, res){
 	data = req.body;
+	var activity = { field: data.field, user: req.user};
+	
 	
 	WorkOrder.model.findById(data._id, function(err, w){
+		activity.workorder = w;
 		if (err) return res.apiError('database read error', err);
-		w.set({
-			price: data.price
-			});
+		switch (data.field){
+			case 'DESCRIPTION':
+				activity.activityType = 'modify';
+				activity.fromValue = w.description;
+				activity.toValue = data.description;
+				w.set({description: data.description});
+				break;
+			
+			case 'ITEMS':
+				activity.activityType = 'modify';
+				activity.fromValue = w.items;
+				activity.toValue = data.items;
+				w.set({items: data.items});
+				break;
+			
+			case 'PRICE':
+				activity.activityType = 'modify';
+				activity.fromValue = w.price;
+				activity.toValue = data.price;
+				w.set({price: data.price});
+				break;
+			
+			case 'ASSIGNEE':
+				activity.activityType = 'assignment';
+				activity.assignedTo = keystone.mongoose.Types.ObjectId(data.assignee);
+				w.set({assignee: data.assignee});
+				break;
+			
+		}
+		if (activity.activityType == 'modify' && activity.fromValue == activity.toValue) {
+			// do nothing
+			return res.apiResponse({workorder: w});
+		}
 		w.save(function(err){
 			if (err) return res.apiError('database update error', err);
-			insertActitivy();
-			res.apiResponse({workorder: w});
+			insertActitivy(activity, function(err){
+				if (err) return res.apiError('activity insert error', err);
+				return res.apiResponse({workorder: w});
+			});
 		})
 	});
 }

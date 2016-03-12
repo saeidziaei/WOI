@@ -55,8 +55,7 @@ exports = module.exports = function(app) {
 	app.post('/api/customer/create', keystone.middleware.api, middleware.requireUser, routes.api.user.createCustomer);
 	
 	app.post('/api/workorder/create', keystone.middleware.api, middleware.requireUser, routes.api.workorder.create);
-	app.post('/api/workorder/updateDescription', keystone.middleware.api, middleware.requireUser, routes.api.workorder.updateDescription);
-	app.post('/api/workorder/updatePrice', keystone.middleware.api, middleware.requireUser, routes.api.workorder.updatePrice);
+	app.post('/api/workorder/updateField', keystone.middleware.api, middleware.requireUser, routes.api.workorder.updateField);
 	app.get('/api/workorder/list', keystone.middleware.api, middleware.requireUser, routes.api.workorder.list);
 	
 	app.post('/api/workorderactivity/create', keystone.middleware.api, middleware.requireUser, routes.api.workorderactivity.create);

@@ -12,20 +12,19 @@ var $ = require('jquery');
 var woStatus = require('./woStatus');
 
 var WO = React.createClass({
-	
-	
+
+
 	render: function(){
-		
+
 		var workorder = this.state.workorder;
 
 		var jobHeader = this.renderJobHeader(workorder);
-		var customer = this.renderCustomer(workorder);	
+		var customer = this.renderCustomer(workorder);
 		var service = this.renderService(workorder);
 		var actions = this.renderActions(workorder);
 		var activities = this.renderActivities(workorder);
-		
+
 		return <div>
-		 
 			{jobHeader}
 			{customer}
 			{service}
@@ -35,13 +34,13 @@ var WO = React.createClass({
 	},
 	renderJobHeader: function(w){
 		var priceInfo = this.renderPriceInfo(w);
-		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' : 
+		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' :
 						 w.status == woStatus.REJECTED ? 'red white-text' : '';
 		return <div className='row '>
 			<div className='col s12 m3 big-font'>
 				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={statusClass + ' chip'}>{w.status}</div>
 			</div>
-			
+
 			<div className='col s12 m3 margin-top grey lighten-5'>
 				<div className="switch margin">
 					<label>
@@ -61,8 +60,8 @@ var WO = React.createClass({
 	renderCustomer: function(w){
 		var c = w.customer;
 		var key = c ? c._id : -1;
-		var lookup = <CustomerLookup key={key} selectedCustomer={c} onChange={this.customerLookupChange} onNewCustomer={this.newCustomerChange}/>;	
-			
+		var lookup = <CustomerLookup key={key} selectedCustomer={c} onChange={this.customerLookupChange} onNewCustomer={this.newCustomerChange}/>;
+
 		return (<div className='customer-section'>
 			<h4 className='header'>Customer</h4>
 			{lookup}
@@ -82,7 +81,7 @@ var WO = React.createClass({
 	renderPriceInfo: function(w){
 		var price = w.status == woStatus.DRAFT || this.state.edit['PRICE'] ? (<div >
 			<div className="input-field left">
-    	      <i className="material-icons prefix">attach_moneyu</i> 
+    	      <i className="material-icons prefix">attach_moneyu</i>
         	  <input id="price-edit" type="text" className=" price" onChange={this.priceChange} value={w.price}/>
           	  <label htmlFor="price-edit" className="active">Price</label>
 	       </div>
@@ -91,16 +90,16 @@ var WO = React.createClass({
 		</div>) :
 		(<div >
 			<div className="input-field left">
-    	      <i className="material-icons prefix">attach_moneyu</i> 
+    	      <i className="material-icons prefix">attach_moneyu</i>
           	  <label htmlFor="price" className="active">Price</label>
         	  <input disabled id="price" type="text" className=" price" value={w.price ? numeral(w.price).format('0,0.00') : w.price}/>
 	       </div>
 
 			   <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'PRICE')}>Change</div>
 			   <div className='clearfix'/>
-		 </div>)  
+		 </div>)
 		;
-		
+
 		return price;
 	},
 	priceChange: function(e){
@@ -120,14 +119,14 @@ var WO = React.createClass({
 					<label htmlFor='description' className={w.description ? 'active' : ''}>Description of service</label>
 				</div>
 				<div className='btn-floating ' onClick={this.update.bind(this, 'DESCRIPTION')} title='Save'><i className='material-icons white green-text'>done</i></div>
-				<div className='clearfix'/>			
+				<div className='clearfix'/>
 			</div>
-		) : (<div> 
+		) : (<div>
 				<h5>Description</h5>
 				<div className='grey-text  service-description left'>{w.description}</div>
 				<div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>
 				<div className='clearfix'/>
-			</div>)			
+			</div>)
 				;
 
 		var serviceItems = null;
@@ -145,7 +144,7 @@ var WO = React.createClass({
 			var btnSave = w.status != woStatus.DRAFT ?
 				 <div className='btn-floating ' onClick={this.update.bind(this, 'ITEMS')} title='Save'><i className='material-icons white green-text'>done</i></div>
 				 :null;
-			
+
 			serviceItems =  <div>
 								<div className='row'>
 									{items}
@@ -159,20 +158,20 @@ var WO = React.createClass({
 				var id = 'item' + item_i;
 				return <li key={id} className='collection-item'> {item} </li>
 			}) : <li className='collection-item'><em>no standard items assigned</em></li>;
-			
-		
-			
+
+
+
 			serviceItems = <div>
 				<ul className='collection with-header'>
-					<li className="collection-header"><h5>Service Items</h5></li>			
+					<li className="collection-header"><h5>Service Items</h5></li>
 					{items}
 					<li className='collection-item'><div className='btn-flat blue-text small' onClick={this.makeEditable.bind(this, 'ITEMS')}>Change</div></li>
 				</ul>
-				
+
 			</div>
 		}
-		
-		
+
+
 		return (<div className='service-section'>
 				<h4 className='header'>Service</h4>
 				{description}
@@ -180,27 +179,31 @@ var WO = React.createClass({
 			</div>)
 	},
 	updateDatabase : function(part){
-		var w = this.state.workorder; 
+		var w = this.state.workorder;
 		if (w.status == woStatus.DRAFT)
 			return;
-		alert('Update database ' + part);
+
+		var params = {field: part, _id: w._id, };
 		switch (part){
 			case 'DESCRIPTION':
-				if (this.state.initialValues.description != w.description){
-					$.post('/api/workorder/updateDescription', {_id: w._id, description: w.description}, this.serverUpdate);
-				};
-			
+				params.description = w.description;
 				break;
-				
+
 			case 'ITEMS':
+				params.items = w.items;
 				break;
 
 			case 'PRICE':
-				if (this.state.initialValues.price != w.price)
-					$.post('/api/workorder/updatePrice', {_id: w._id, price: w.price}, this.serverUpdate);
+				params.price = w.price;
 				break;
-			
+
+			case 'ASSIGNEE':
+				params.assignee = w.assignee._id;
+				break;
 		}
+	
+		$.post('/api/workorder/updateField', params, this.serverUpdate).error(this.handleError);
+
 	},
 	update: function(part){
 		this.updateDatabase(part);
@@ -221,10 +224,10 @@ var WO = React.createClass({
 	handleServiceItemChange: function(item){
 		w = this.state.workorder;
 		if (_.contains(w.items, item)){
-			w.items = _.without(w.items, item);			
+			w.items = _.without(w.items, item);
 		} else {
 			w.items.push(item);
-		}	
+		}
 		this.setState({
 			workorder: w
 		});
@@ -244,15 +247,19 @@ var WO = React.createClass({
 			</div>
 		</div>)
 	},
+	handleError: function(err){
+		console.log(err, "err.responseJSON.error is going to be used");
+		swal("Whoops! " + err.responseJSON.error, err.responseJSON.detail, "error");
+	},
 	showError: function(msg){
-		swal(msg, "", "error");	
+		swal(msg, "error", "error");
 	},
 	create: function(){
 		try{
 			var w = this.state.workorder;
-			
+
 			if (this.state.createNewCustomer){
-				var newCustomer = this.state.newCustomer; 
+				var newCustomer = this.state.newCustomer;
 				if (!newCustomer){
 					this.showError("Customer is missing.");
 					return;
@@ -318,9 +325,9 @@ var WO = React.createClass({
 										 <Operator data={w.assignee}  />
 										 <br/>
 										 <div className='btn-flat blue-text small' onClick={this.assignTo}>Change</div>
-									</div> : 
-									w.status != woStatus.DRAFT ? 
-									<div className='btn' onClick={this.assignTo}>Assign To ...</div> 
+									</div> :
+									w.status != woStatus.DRAFT ?
+									<div className='btn' onClick={this.assignTo}>Assign To ...</div>
 									: null;
 		var operatorPicker = this.state.showOperatorPicker ? <OperatorPicker data={this.state.operators} onSelect={this.assigneeSelected} /> : null;
 		var btnComplete = w.status == woStatus.IN_PROGRESS ? <div className='btn green lighten-1'  onClick={this.complete}>Complete</div> : null;
@@ -333,18 +340,17 @@ var WO = React.createClass({
 						</div>
 						<div className='btn' onClick={this.submitAction}>OK</div>
 					</div>) : null;
-	
-		
+
+
 		return (
 			<div className='section-actions'>
 				<hr/>
-				{assignee}
+				{assignee}{operatorPicker}
 				{btnCreate}
 				{btnStart}
 				{btnReject}
 				{btnWaitForPart}
 				{btnWaitForCustomer}
-				{operatorPicker}
 				{btnReopen}
 				{btnComplete}
 				{actionDetails}
@@ -353,23 +359,24 @@ var WO = React.createClass({
 	},
 	assignTo: function(){
 		if (this.state.operators){
-			this.setState({	showOperatorPicker: true });	
+			this.setState({	showOperatorPicker: !this.state.showOperatorPicker });
 		} else {
 			$.get("/api/operator/list-names", function(result){
 				this.setState({
 					showOperatorPicker: true,
 					operators: result.operators
-				});	
+				});
 			}.bind(this));
-		}		
+		}
 	},
 	assigneeSelected: function(operator){
 		var w = this.state.workorder;
 		w.assignee = operator;
-		this.setState({	
+		this.setState({
 			showOperatorPicker: false,
 			workorder: w
-		});	
+		});
+		this.updateDatabase("ASSIGNEE")
 	},
 	actionNoteChanged: function(e){
 		this.setState({
@@ -388,17 +395,17 @@ var WO = React.createClass({
 		{
 			case 'WAIT FOR PART':
 				$.post('/workorder/waitForPart', {note: note}, serverUpdate);
-				break; 
-	
+				break;
+
 			case 'WAIT FOR CUSTOMER':
 				$.post('/workorder/waitForCustomer', {note: note}, serverUpdate);
-				break; 
-	
+				break;
+
 			case 'REOPEN':
 				$.post('/workorder/reopen', {note: note}, serverUpdate);
-				break; 
+				break;
 		}
-	
+
 		this.setState({
 			showActionDetail: false,
 			actionType: null,
@@ -414,11 +421,13 @@ var WO = React.createClass({
 	startProgress: function(){
 		$.post('/workorder/startProgress', serverUpdate);
 	},
-	serverUpdate: function(err, result){
-		if (err) showError(err);
-		this.setState({
-		workorder: result.workorder
-		});
+	serverUpdate: function(result){
+		console.log("back from server", result);
+		
+		// In most cases we shouldn't need to refresh the state as it is already in sync
+		// this.setState({
+		// 	workorder: result.workorder
+		// });
 	},
 	saveCustomer: function(customer, cb){
 		$.post("/api/customer/create", customer, function(result){
@@ -435,7 +444,7 @@ var WO = React.createClass({
 	,
 	getNameObject:function (name){
 		if (!name) return null;
-		
+
 		var first, last, delimiterIndex = name.indexOf("-");
 		if (delimiterIndex != -1){
 			first = name.substring(0, delimiterIndex - 1).trim();
@@ -466,4 +475,4 @@ var WO = React.createClass({
 	},
 });
 
-module.exports = WO 
+module.exports = WO

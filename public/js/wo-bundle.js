@@ -34349,23 +34349,27 @@ var WO = React.createClass({
 	updateDatabase: function (part) {
 		var w = this.state.workorder;
 		if (w.status == woStatus.DRAFT) return;
-		alert('Update database ' + part);
+
+		var params = { field: part, _id: w._id };
 		switch (part) {
 			case 'DESCRIPTION':
-				if (this.state.initialValues.description != w.description) {
-					$.post('/api/workorder/updateDescription', { _id: w._id, description: w.description }, this.serverUpdate);
-				};
-
+				params.description = w.description;
 				break;
 
 			case 'ITEMS':
+				params.items = w.items;
 				break;
 
 			case 'PRICE':
-				if (this.state.initialValues.price != w.price) $.post('/api/workorder/updatePrice', { _id: w._id, price: w.price }, this.serverUpdate);
+				params.price = w.price;
 				break;
 
+			case 'ASSIGNEE':
+				params.assignee = w.assignee._id;
+				break;
 		}
+
+		$.post('/api/workorder/updateField', params, this.serverUpdate).error(this.handleError);
 	},
 	update: function (part) {
 		this.updateDatabase(part);
@@ -34417,8 +34421,12 @@ var WO = React.createClass({
 			)
 		);
 	},
+	handleError: function (err) {
+		console.log(err, "err.responseJSON.error is going to be used");
+		swal("Whoops! " + err.responseJSON.error, err.responseJSON.detail, "error");
+	},
 	showError: function (msg) {
-		swal(msg, "", "error");
+		swal(msg, "error", "error");
 	},
 	create: function () {
 		try {
@@ -34567,12 +34575,12 @@ var WO = React.createClass({
 			{ className: 'section-actions' },
 			React.createElement('hr', null),
 			assignee,
+			operatorPicker,
 			btnCreate,
 			btnStart,
 			btnReject,
 			btnWaitForPart,
 			btnWaitForCustomer,
-			operatorPicker,
 			btnReopen,
 			btnComplete,
 			actionDetails
@@ -34580,7 +34588,7 @@ var WO = React.createClass({
 	},
 	assignTo: function () {
 		if (this.state.operators) {
-			this.setState({ showOperatorPicker: true });
+			this.setState({ showOperatorPicker: !this.state.showOperatorPicker });
 		} else {
 			$.get("/api/operator/list-names", function (result) {
 				this.setState({
@@ -34597,6 +34605,7 @@ var WO = React.createClass({
 			showOperatorPicker: false,
 			workorder: w
 		});
+		this.updateDatabase("ASSIGNEE");
 	},
 	actionNoteChanged: function (e) {
 		this.setState({
@@ -34640,11 +34649,13 @@ var WO = React.createClass({
 	startProgress: function () {
 		$.post('/workorder/startProgress', serverUpdate);
 	},
-	serverUpdate: function (err, result) {
-		if (err) showError(err);
-		this.setState({
-			workorder: result.workorder
-		});
+	serverUpdate: function (result) {
+		console.log("back from server", result);
+
+		// In most cases we shouldn't need to refresh the state as it is already in sync
+		// this.setState({
+		// 	workorder: result.workorder
+		// });
 	},
 	saveCustomer: function (customer, cb) {
 		$.post("/api/customer/create", customer, function (result) {

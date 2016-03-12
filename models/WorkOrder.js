@@ -14,6 +14,8 @@ WorkOrder.add({
     description: {type: String, initial: true },
     items: {type: Types.TextArray},
 	price: {type: Types.Number, required: false},
+	assignee: { type: Types.Relationship, required: false, ref: 'User', filters:{isOperator: true}, index: true, initial: false },
+	
 });
 
 WorkOrder.relationship({ ref: 'WorkOrderActivity', refPath: 'workorder', path: 'activities' });

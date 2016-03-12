@@ -13,6 +13,7 @@ var WorkOrderActivity = new keystone.List('WorkOrderActivity', {
 WorkOrderActivity.add({
 	activityType: { type: Types.Select, options: [
 		{ value: 'comment', label: 'Comment' },
+		{ value: 'modify', label: 'Field Change' },
 		{ value: 'transition', label: 'Transition (State Change)' },
 		{ value: 'assignment', label: 'Assign To' }
 	] },
@@ -23,10 +24,19 @@ WorkOrderActivity.add({
 		fromState: { type: String, initial: false },
 		toState: { type: String, initial: false }
 	},
+	// only when type = modify
+	modify: {
+		field: { type: String, initial: false },
+		fromValue: { type: String, initial: false },
+		toValue: { type: String, initial: false }
+	},
 	// only when type = assignment
 	assignedTo: { type: Types.Relationship, required: false, ref: 'User', initial: false },
 		
 });
 
+WorkOrderActivity.defaultSort = '-createdAt';
+
+WorkOrderActivity.defaultColumns = 'workorder, createdBy, createdAt, comment, activityType';
 
 WorkOrderActivity.register();
