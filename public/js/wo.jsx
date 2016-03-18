@@ -1,37 +1,27 @@
 var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
-var WO = require('./components/wo.js') 
-var CustomerLookup = require('./components/customerLookup.js') 
+var WO = require('./components/wo.js');
+var WoLookup = require('./components/woLookup.js');
 var OperatorPicker = require('./components/operatorPicker.js');
-var async = require('async');
 
+// TODO: Maybe seperate these out
 $(document).ready(function(){
+	var woContainer = document.getElementById('wo-container');
+	if (woContainer){
+		ReactDOM.render(<WO standardItems={standardItems} data={woObject} />, woContainer);
+	}
+
+	var woLookupContainer = document.getElementById('wo-lookup-container');
+	if (woLookupContainer){
+		ReactDOM.render(<WoLookup  />, woLookupContainer);
+	}
 	
-	ReactDOM.render(
-		<WO standardItems={standardItems} data={woObject} />,
-		document.getElementById('wo-container')
-	);
-	/*
-	ReactDOM.render(
-		<CustomerLookup onChange={customerLookupChange} />,
-		document.getElementById('customer-lookup-container')
-	);
-	
-	// Operators - Only needed after work item has been saved	
-	$.get("/api/operator/list-names", function(result){
-		ReactDOM.render(
-			<OperatorPicker data={result.operators} onSelect={assignToOperator} />,
-			document.getElementById('operator-picker')
-		);
-	});
-	$("#operator-picker").hide();
-	$("#btn-assignto").on('click', function(){ 
-		 $("#operator-picker").fadeToggle("slow")
-	});
-	*/
+	var operatorsContainer = document.getElementById('operators-container');
+	if (operatorsContainer){
+		$.get("/api/operator/list-names", function(result){
+			ReactDOM.render(<OperatorPicker onSelect={operatorSelected} data={result.operators}  />, operatorsContainer);
+		});	
+	}
 });
 
-function assignToOperator(operator){
-	
-}

@@ -1,17 +1,19 @@
 extends ../layouts/default
 
-
 block intro
 	.container
-		h1 Work Orders
-		
+		// h4.header= locals.title
+		// hr
 block content
 	.container
-		.panel.panel-default
-			.panel-heading Work Orders
-			.panel-body
-				#list-container
+		if user.isOperator
+			h1 So you are an operator?!
+		#wo-lookup-container.margin-top
 
+		#validation.card-panel.red.lighten-1.hide.white-text
+			i.material-icons.margin-right info
+			span#text Error text
+		
 block js
-	script(src='/js/workorder-bundle.js')
+	script(src='/js/wo-bundle.js')
 	

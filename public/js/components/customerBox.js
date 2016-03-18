@@ -3,19 +3,23 @@ var CustomerBox = React.createClass({
 	render: function(){
 		var customer = this.props.data;
 		var displayName = this.customerName(customer);
-		var moreLink = customer && customer._id ?
+		var moreLink = !this.props.isCompact && customer && customer._id ?
 			<div className="card-action">
 					<a onClick={this.stopPropagation} target="_blank" href={'/customer/' + customer._id}>Edit</a>
 			</div> :
 			null;
+		var info = this.props.isCompact ? null :
+			<div className='info'>
+				<p><a href={'tel:'+ customer.phone}> {customer.phone} </a></p>
+				<p><a href={'mailto:' + customer.email}> {customer.email} </a></p>
+				<p>{customer.billingAddress}</p>
+			</div>
 		return (
 			<div className={this.props.className } onClick={this.boxClicked} >
 				<div className='card hoverable clickable grey lighten-4' >
 					<div className='card-content' >
 						<span className="card-title"><i className="material-icons">account_circle</i>  {displayName}</span>
-						<p><a href={'tel:'+ customer.phone}> {customer.phone} </a></p>
-						<p><a href={'mailto:' + customer.email}> {customer.email} </a></p>
-						<p>{customer.billingAddress}</p>
+						{info}
 					</div>
 					{moreLink}
 				</div> 

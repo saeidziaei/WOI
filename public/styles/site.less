@@ -32,11 +32,18 @@
 html{
 	font-family: "Roboto", sans-serif;
 }
+.clickable{
+	cursor: pointer;
+}
 .price{
 	font-size: 24pt !important;	
 	font-weight: 300;
 	width: 80%;
 }
+h2, h3{
+	color:#205081;
+}
+
 .small{
 	font-size: .8em;
 }
@@ -55,11 +62,13 @@ html{
 .section-actions .btn{
 	margin: 10px;
 }
-nav{
-	background-color: #e1f5fe;
+nav, .warm-blue{
+	background-color: #205081;
+	color: white;
 }
-nav ul a{
-	color: #0089EC;
+.warm-blue:hover{
+	background-color: #205081;
+	color:yellow;
 }
 .font-double{
 	font-style: 2em;
@@ -87,78 +96,3 @@ nav ul a{
 .margin-text{
 	margin: 5px;
 }
-.clickable{
-	cursor: pointer;
-}
-.blue{
-	color: #1378af;
-}
-.tile-img{
-    font-size: 40pt;
-    text-align: center;
-}
-.next-payment, .another-tile {
-  background: #1378af;
-  }
-  .next-payment:hover, .another-tile:hover {
-  background: #0d547a;
-  }
-  .tile {
-  min-height: 140px;
-  margin-top: 15px;
-  display: block;
-  padding: 5px 15px 15px 15px;
-  position: relative;
-  border-radius: 5px;
-  }
-  .payment-amount {
-  font-size: 2.5em;
-  }
-  .tiles-container a {
-  color: #fff;
-  text-decoration: none;
-  }
-  .tile {
-  min-height: 140px;
-  margin-top: 15px;
-  display: block;
-  padding: 5px 15px 15px 15px;
-  position: relative;
-  }
-  .header-bar{
-  background-color:#000;
-  color:white;
-  }
-  .tile-full-height{
-  min-height:450px;
-  background-color:#FE9;
-  }
-  .reminders.full{
-  background-size:450px;
-  min-height:450px;
-  
-  }
-  .my-profile{
-  background:#1378af;
-  }
-  .my-profile:hover{
-  background:#0d547a;
-  }
-  .my-profile .tile-img{
-  background:url('../images/icon-landingpage-myprofile.png') no-repeat center center;
-  }
-  .purple{
-  background:#823df0;
-  }
-  .purple:hover{
-  background:#5b2ba8;
-  }
-  .request-doc .tile-img{
-  background:url('../images/request-document.png') no-repeat center center;
-  }
-  .green{
-  background:#49850c;
-  }
-  .green:hover{
-  background:#335d08;
-  }

@@ -2,6 +2,8 @@ var keystone = require('keystone');
 var WorkOrder = keystone.list('WorkOrder');
 var WorkOrderActivity = keystone.list('WorkOrderActivity');
 var async = require('async');
+var	url = require("url");
+
 /**
  * Create a Work Order
  */
@@ -105,6 +107,13 @@ exports.updateField = function(req, res){
 				w.set({price: data.price});
 				break;
 			
+			case 'LOCATION':
+				activity.activityType = 'modify';
+				activity.fromValue = w.location;
+				activity.toValue = data.location;
+				w.set({location: data.location});
+				break;
+			
 			case 'ASSIGNEE':
 				activity.activityType = 'assignment';
 				activity.assignedTo = keystone.mongoose.Types.ObjectId(data.assignee);
@@ -157,4 +166,47 @@ exports.list = function(req, res) {
 	});
 		
 	
+}
+
+
+exports.search = function (req, res) {
+
+	
+	// Set locals
+	// locals.section = 'workorder-search';
+
+	var queryData = url.parse(req.url, true).query;
+	var token = queryData.token;
+	var conditions = [], regex;
+	// conditions.push({"status": "DRAFT"});
+
+	if (queryData.token) {
+		regex = new RegExp(token, 'i');
+		var subConditions = [
+			{ "description": regex },
+			{ "items": regex }
+			];
+		if (!isNaN(token)){
+			subConditions.push({"jobNumber": token});
+		}
+		conditions.push({ $or: subConditions});
+		
+		
+	}
+ 
+ 	var q = keystone.list('WorkOrder').model
+		.find({ $and: conditions } )
+		.populate("assignee customer")
+		.sort('-createdAt')
+		.limit('20'); 
+		
+	q.exec(function(err, results) {
+		if (err) return res.apiError('database error', err);
+		res.apiResponse({
+			workorders: results
+		});
+		
+	});
+	
+
 }

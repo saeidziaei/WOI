@@ -32,62 +32,27 @@ var WO = React.createClass({
 			{activities}
 		</div>
 	},
-	renderJobHeader: function(w){
-		var priceInfo = this.renderPriceInfo(w);
-		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' :
-						 w.status == woStatus.REJECTED ? 'red white-text' : '';
-		return <div className='row '>
-			<div className='col s12 m3 big-font'>
-				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={statusClass + ' chip'}>{w.status}</div>
-			</div>
-
-			<div className='col s12 m3 margin-top grey lighten-5'>
-				<div className="switch margin">
-					<label>
-					In Store
-					<input type="checkbox"/>
-					<span className="lever"></span>
-					On Site
-					</label>
-  				</div>
-  			</div>
-
-			<div className='col s12 m6'>
-				{priceInfo}
-			</div>
-		</div>
-	},
-	renderCustomer: function(w){
-		var c = w.customer;
-		var key = c ? c._id : -1;
-		var lookup = <CustomerLookup key={key} selectedCustomer={c} onChange={this.customerLookupChange} onNewCustomer={this.newCustomerChange}/>;
-
-		return (<div className='customer-section'>
-			<h4 className='header'>Customer</h4>
-			{lookup}
-		</div>);
-	},
-	customerLookupChange: function(c){
-		var w = this.state.workorder;
-		w.customer = c;
-		this.setState({
-			workorder: w,
-			createNewCustomer: false
-		});
-	},
-	newCustomerChange : function(c){
-		this.setState({	newCustomer: c, createNewCustomer: c != null });
-	},
 	renderPriceInfo: function(w){
-		var price = w.status == woStatus.DRAFT || this.state.edit['PRICE'] ? (<div >
+		var price = w.status == woStatus.DRAFT ?
+		(<div >
 			<div className="input-field left">
     	      <i className="material-icons prefix">attach_moneyu</i>
         	  <input id="price-edit" type="text" className=" price" onChange={this.priceChange} value={w.price}/>
           	  <label htmlFor="price-edit" className="active">Price</label>
 	       </div>
-	       <div className='btn-floating ' onClick={this.update.bind(this, 'PRICE')} title='Save'><i className='material-icons white green-text'>done</i></div>
+		</div>)
+		: this.state.edit['PRICE'] ?  
+		(<div >
+			<div className="input-field left">
+    	      <i className="material-icons prefix">attach_moneyu</i>
+        	  <input id="price-edit" type="text" className=" price" onChange={this.editPriceChange} value={this.state.editPrice}/>
+          	  <label htmlFor="price-edit" className="active">Price</label>
+	       </div>
+	       <div className='btn-floating ' onClick={this.editDone.bind(this, 'PRICE')} title='Save'><i className='material-icons white green-text'>done</i></div>
+	       <div className='btn-floating ' onClick={this.editCancel} title='Cancel Edit'><i className='material-icons white red-text'>clear</i></div>
 		   <div className='clearfix'/>
-		</div>) :
+		</div>)
+		:
 		(<div >
 			<div className="input-field left">
     	      <i className="material-icons prefix">attach_moneyu</i>
@@ -102,6 +67,12 @@ var WO = React.createClass({
 
 		return price;
 	},
+	editPriceChange: function(e){
+		this.setState({	editPrice: e.target.value });
+	},
+	editDescriptionChange: function(e){
+		this.setState({	editDescription: e.target.value });
+	},
 	priceChange: function(e){
 		var w = this.state.workorder;
 		w.price = e.target.value;
@@ -111,17 +82,28 @@ var WO = React.createClass({
 	},
 	renderService: function(w){
 
-		var description = w.status == woStatus.DRAFT || this.state.edit['DESCRIPTION'] ?  (
-			<div className='row'>
+		var description = w.status == woStatus.DRAFT ?
+			(<div className='row'>
 				<div className='input-field left col s8'>
 					<i className='material-icons prefix'>mode_edit</i>
 					<textarea  id='description' onChange={this.handleDescriptionChange} className='materialize-textarea service-description' value={w.description} />
 					<label htmlFor='description' className={w.description ? 'active' : ''}>Description of service</label>
 				</div>
-				<div className='btn-floating ' onClick={this.update.bind(this, 'DESCRIPTION')} title='Save'><i className='material-icons white green-text'>done</i></div>
+			</div>)
+			: this.state.edit['DESCRIPTION'] ?   
+			(<div className='row'>
+				<div className='input-field left col s8'>
+					<i className='material-icons prefix'>mode_edit</i>
+					<textarea  id='description' onChange={this.editDescriptionChange} className='materialize-textarea service-description' value={this.state.editDescription} />
+					<label htmlFor='description' className={w.description ? 'active' : ''}>Description of service</label>
+				</div>
+				<div className='btn-floating ' onClick={this.editDone.bind(this, 'DESCRIPTION')} title='Save'><i className='material-icons white green-text'>done</i></div>
+	       		<div className='btn-floating ' onClick={this.editCancel} title='Cancel Edit'><i className='material-icons white red-text'>clear</i></div>
 				<div className='clearfix'/>
-			</div>
-		) : (<div>
+			</div>)
+			
+			
+			: (<div>
 				<h5>Description</h5>
 				<div className='grey-text  service-description left'>{w.description}</div>
 				<div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>
@@ -130,7 +112,7 @@ var WO = React.createClass({
 				;
 
 		var serviceItems = null;
-		if (w.status == woStatus.DRAFT || this.state.edit['ITEMS'])
+		if (w.status == woStatus.DRAFT)
 		{ // display checkboxes
 			var items = this.props.standardItems ? this.props.standardItems.map(function(item, item_i){
 				var id = 'item' + item_i;
@@ -141,19 +123,38 @@ var WO = React.createClass({
 					<label htmlFor={id}>{item}</label>
 				</div>
 			}.bind(this)) : null;
-			var btnSave = w.status != woStatus.DRAFT ?
-				 <div className='btn-floating ' onClick={this.update.bind(this, 'ITEMS')} title='Save'><i className='material-icons white green-text'>done</i></div>
-				 :null;
-
+			
 			serviceItems =  <div>
 								<div className='row'>
 									{items}
 								</div>
+							</div>;
+		}
+		else if (this.state.edit['ITEMS']){
+			var items = this.props.standardItems ? this.props.standardItems.map(function(item, item_i){
+				var id = 'item' + item_i;
+				var checked = this.state.editItems && _.contains(this.state.editItems, item)  ? 'checked' : '';
+
+				return <div className='col s12 m6' key={id}>
+					<input type='checkbox' id={id} checked={checked} onChange={this.editItemChange.bind(this, item)}/>
+					<label htmlFor={id}>{item}</label>
+				</div>
+			}.bind(this)) : null;
+			var buttons = <div>
+	    			<div className='btn-floating ' onClick={this.editDone.bind(this, 'ITEMS')} title='Save'><i className='material-icons white green-text'>done</i></div>
+            		<div className='btn-floating ' onClick={this.editCancel} title='Cancel Edit'><i className='material-icons white red-text'>clear</i></div> </div>
+				 
+
+			serviceItems =  <div>
+								<div className='row margin-top'>
+									{items}
+								</div>
 								<div className='row'>
-									{btnSave}
+									{buttons}
 								</div>
 							</div>;
-		} else {
+		}
+		 else {
 			items = w.items && w.items.length ? w.items.map(function(item, item_i){
 				var id = 'item' + item_i;
 				return <li key={id} className='collection-item'> {item} </li>
@@ -178,48 +179,83 @@ var WO = React.createClass({
 				{serviceItems}
 			</div>)
 	},
-	updateDatabase : function(part){
+	
+	locationChange: function(e){
 		var w = this.state.workorder;
-		if (w.status == woStatus.DRAFT)
-			return;
-
+		w.location = e.target.checked ? 'On Site' : 'In Store';
+		this.setState({workorder: w});
+		this.editDone('LOCATION');
+	},
+	editCancel: function(){
+		this.setState({edit:[]});
+	},
+	editDone: function(part){
+		var w = this.state.workorder;
 		var params = {field: part, _id: w._id, };
+
+		
 		switch (part){
 			case 'DESCRIPTION':
-				params.description = w.description;
+				params.description = w.description = this.state.editDescription; 
 				break;
 
 			case 'ITEMS':
-				params.items = w.items;
+				params.items = w.items = this.state.editItems; 
 				break;
 
 			case 'PRICE':
-				params.price = w.price;
+				params.price = w.price = this.state.editPrice;
 				break;
 
 			case 'ASSIGNEE':
 				params.assignee = w.assignee._id;
 				break;
+
+			case 'LOCATION':
+				params.location = w.location;
+				break;
 		}
 	
+		// update state
+		this.setState({edit: [], workorder: w});
+		// update database
 		$.post('/api/workorder/updateField', params, this.serverUpdate).error(this.handleError);
-
-	},
-	update: function(part){
-		this.updateDatabase(part);
-		var edit = [];
-		// or if you want multiple editable fields:
-		// var edit = this.state.edit;
-		// edit[part] = false;
-		this.setState({edit: edit});
 	},
 	makeEditable: function(part){
 		var edit = [];
 		edit[part] = true;
-		// or if you want multiple editable fields:
-		// var edit = this.state.edit;
-		// edit[part] = true;
-		this.setState({edit: edit});
+		var editPrice, editDescription, editItems;
+			
+		switch (part) {
+			case 'PRICE':
+				editPrice = this.state.workorder.price;
+				break;
+		
+			case 'DESCRIPTION':
+				editDescription = this.state.workorder.description;
+				break;
+
+			case 'ITEMS':
+				editItems = this.state.workorder.items;
+				break;
+		}
+		this.setState({
+			edit: edit,
+			editPrice: editPrice,
+			editDescription: editDescription,
+			editItems: editItems
+		});
+	},
+	editItemChange: function(item){
+		var editItems = this.state.editItems;
+		if (_.contains(editItems, item)){
+			editItems = _.without(editItems, item);
+		} else {
+			editItems.push(item);
+		}
+		this.setState({
+			editItems: editItems
+		});
 	},
 	handleServiceItemChange: function(item){
 		w = this.state.workorder;
@@ -307,8 +343,105 @@ var WO = React.createClass({
 		}
 		catch (e){
 			console.log(e);
-			alert("Ooops! someting is not working.");
+			this.showError("Ooops! someting is not working.");
 		}
+	},
+	assignTo: function(){
+		if (this.state.operators){
+			this.setState({	showOperatorPicker: !this.state.showOperatorPicker });
+		} else {
+			$.get("/api/operator/list-names", function(result){
+				this.setState({
+					showOperatorPicker: true,
+					operators: result.operators
+				});
+			}.bind(this));
+		}
+	},
+	assigneeSelected: function(operator){
+		var w = this.state.workorder;
+		w.assignee = operator;
+		this.setState({
+			showOperatorPicker: false,
+			workorder: w
+		});
+		this.editDone("ASSIGNEE")
+	},
+	actionNoteChanged: function(e){
+		this.setState({
+		actionNote: e.target.value
+		});
+	},
+	showActionDetails: function(actionType){
+		this.setState({
+			showActionDetail: true,
+			actionType: actionType
+		});
+	},
+	submitAction: function(){
+		var note = this.state.actionNote;
+		switch (this.state.actionType)
+		{
+			case 'WAIT FOR PART':
+				$.post('/workorder/waitForPart', {note: note}, serverUpdate);
+				break;
+
+			case 'WAIT FOR CUSTOMER':
+				$.post('/workorder/waitForCustomer', {note: note}, serverUpdate);
+				break;
+
+			case 'REOPEN':
+				$.post('/workorder/reopen', {note: note}, serverUpdate);
+				break;
+		}
+
+		this.setState({
+			showActionDetail: false,
+			actionType: null,
+			actionNote: null
+		});
+	},
+	reject: function(){
+		$.post('/workorder/reject', serverUpdate);
+	},
+	complete: function(){
+		$.post('/workorder/complete', serverUpdate);
+	},
+	startProgress: function(){
+		$.post('/workorder/startProgress', serverUpdate);
+	},
+	serverUpdate: function(result){
+		// console.log("back from server", result);
+		// In most cases we shouldn't need to refresh the state as it is already in sync
+		swal({   title: "Success!",   text: "Job updated.", type: "success",  timer: 1000,   showConfirmButton: false, animation: "slide-from-top" });
+	},
+	saveCustomer: function(customer, cb){
+		$.post("/api/customer/create", customer, function(result){
+			console.log("/customer/save", result);
+			cb(result);
+		});
+	}
+	,
+	saveWorkOrder:function(workOrder, cb){
+		$.post("/api/workorder/create", workOrder, function(result){
+			cb(result);
+		});
+	}
+	,
+	getNameObject:function (name){
+		if (!name) return null;
+
+		var first, last, delimiterIndex = name.indexOf("-");
+		if (delimiterIndex != -1){
+			first = name.substring(0, delimiterIndex - 1).trim();
+			last = name.substring(delimiterIndex + 1).trim();
+		} else {
+			// 'Paul Steve Panakkal'.split(' ').slice(0, -1).join(' '); // returns "Paul Steve"
+			// 'Paul Steve Panakkal'.split(' ').slice(-1).join(' '); // returns "Panakkal"
+			first = name.split(' ').slice(0, -1).join(' ');
+			last = name.split(' ').slice(-1).join(' ');
+		}
+		return {first: first, last: last};
 	},
 	renderActions: function(w){
 		var btnCreate = !w.jobNumber ? <div className='btn' onClick={this.create}>Create</div> : null;
@@ -357,105 +490,51 @@ var WO = React.createClass({
 			</div>
 		);
 	},
-	assignTo: function(){
-		if (this.state.operators){
-			this.setState({	showOperatorPicker: !this.state.showOperatorPicker });
-		} else {
-			$.get("/api/operator/list-names", function(result){
-				this.setState({
-					showOperatorPicker: true,
-					operators: result.operators
-				});
-			}.bind(this));
-		}
+	renderJobHeader: function(w){
+		var priceInfo = this.renderPriceInfo(w);
+		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' :
+						 w.status == woStatus.REJECTED ? 'red white-text' : '';
+		return <div className='row '>
+			<div className='col s12 m3 big-font'>
+				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={statusClass + ' chip'}>{w.status}</div>
+			</div>
+
+			<div className='col s12 m3 margin-top grey lighten-5'>
+				<div className="switch margin">
+					<label>
+					In Store
+					<input type="checkbox" onChange={this.locationChange} checked={w.location == 'On Site'} />
+					<span className="lever"></span>
+					On Site
+					</label>
+  				</div>
+  			</div>
+
+			<div className='col s12 m6'>
+				{priceInfo}
+			</div>
+		</div>
 	},
-	assigneeSelected: function(operator){
+	renderCustomer: function(w){
+		var c = w.customer;
+		var key = c ? c._id : -1;
+		var lookup = <CustomerLookup key={key} selectedCustomer={c} onChange={this.customerLookupChange} onNewCustomer={this.newCustomerChange}/>;
+
+		return (<div className='customer-section'>
+			<h4 className='header'>Customer</h4>
+			{lookup}
+		</div>);
+	},
+	customerLookupChange: function(c){
 		var w = this.state.workorder;
-		w.assignee = operator;
+		w.customer = c;
 		this.setState({
-			showOperatorPicker: false,
-			workorder: w
-		});
-		this.updateDatabase("ASSIGNEE")
-	},
-	actionNoteChanged: function(e){
-		this.setState({
-		actionNote: e.target.value
+			workorder: w,
+			createNewCustomer: false
 		});
 	},
-	showActionDetails: function(actionType){
-		this.setState({
-			showActionDetail: true,
-			actionType: actionType
-		});
-	},
-	submitAction: function(){
-		var note = this.state.actionNote;
-		switch (this.state.actionType)
-		{
-			case 'WAIT FOR PART':
-				$.post('/workorder/waitForPart', {note: note}, serverUpdate);
-				break;
-
-			case 'WAIT FOR CUSTOMER':
-				$.post('/workorder/waitForCustomer', {note: note}, serverUpdate);
-				break;
-
-			case 'REOPEN':
-				$.post('/workorder/reopen', {note: note}, serverUpdate);
-				break;
-		}
-
-		this.setState({
-			showActionDetail: false,
-			actionType: null,
-			actionNote: null
-		});
-	},
-	reject: function(){
-		$.post('/workorder/reject', serverUpdate);
-	},
-	complete: function(){
-		$.post('/workorder/complete', serverUpdate);
-	},
-	startProgress: function(){
-		$.post('/workorder/startProgress', serverUpdate);
-	},
-	serverUpdate: function(result){
-		console.log("back from server", result);
-		
-		// In most cases we shouldn't need to refresh the state as it is already in sync
-		// this.setState({
-		// 	workorder: result.workorder
-		// });
-	},
-	saveCustomer: function(customer, cb){
-		$.post("/api/customer/create", customer, function(result){
-			console.log("/customer/save", result);
-			cb(result);
-		});
-	}
-	,
-	saveWorkOrder:function(workOrder, cb){
-		$.post("/api/workorder/create", workOrder, function(result){
-			cb(result);
-		});
-	}
-	,
-	getNameObject:function (name){
-		if (!name) return null;
-
-		var first, last, delimiterIndex = name.indexOf("-");
-		if (delimiterIndex != -1){
-			first = name.substring(0, delimiterIndex - 1).trim();
-			last = name.substring(delimiterIndex + 1).trim();
-		} else {
-			// 'Paul Steve Panakkal'.split(' ').slice(0, -1).join(' '); // returns "Paul Steve"
-			// 'Paul Steve Panakkal'.split(' ').slice(-1).join(' '); // returns "Panakkal"
-			first = name.split(' ').slice(0, -1).join(' ');
-			last = name.split(' ').slice(-1).join(' ');
-		}
-		return {first: first, last: last};
+	newCustomerChange : function(c){
+		this.setState({	newCustomer: c, createNewCustomer: c != null });
 	},
 	getInitialState : function(){
 		return {
@@ -470,6 +549,7 @@ var WO = React.createClass({
 			edit: [],
 			editDescription: false,
 			editItems: false,
+			editPrice: null,
 			showOperatorPicker: false
 		}
 	},

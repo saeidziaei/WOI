@@ -42,8 +42,10 @@ exports = module.exports = function(app) {
 	app.get('/gallery', routes.views.gallery);
 	app.all('/contact', routes.views.contact);
 	app.all('/wolist', middleware.requireStaff, routes.views.wolist);
-	app.all('/customer/:customer?', middleware.requireStaff, routes.views.customer);
-	
+	app.all('/customer/:customer?', middleware.requireStaff, routes.views.customer, routes.views.user);
+	app.all('/operator/:operator?', middleware.requireManager, routes.views.operator, routes.views.user);
+	app.get('/operators', middleware.requireManager, routes.views.operators);
+	app.get('/tracking/:jobNumber?', middleware.requireUser, routes.views.tracking);
 	
 	// NOTE: To protect a route so that only admins can see it, use the requireUser middleware:
 	// app.get('/protected', middleware.requireUser, routes.views.protected);
@@ -53,6 +55,9 @@ exports = module.exports = function(app) {
 	// app.get('/api/customer/list', keystone.initAPI, routes.api.posts.list);
 	app.get('/api/customer/search', keystone.middleware.api, middleware.requireUser, routes.api.user.searchCustomer);
 	app.post('/api/customer/create', keystone.middleware.api, middleware.requireUser, routes.api.user.createCustomer);
+	
+	app.get('/api/workorder/search', keystone.middleware.api, middleware.requireUser, routes.api.workorder.search);
+	
 	
 	app.post('/api/workorder/create', keystone.middleware.api, middleware.requireUser, routes.api.workorder.create);
 	app.post('/api/workorder/updateField', keystone.middleware.api, middleware.requireUser, routes.api.workorder.updateField);

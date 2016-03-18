@@ -5,10 +5,10 @@
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",
-			"program": "keystone.js",
+			"program": "${workspaceRoot}/keystone.js",
 			"stopOnEntry": false,
 			"args": [],
-			"cwd": ".",
+			"cwd": "${workspaceRoot}/.",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"

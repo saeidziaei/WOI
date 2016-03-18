@@ -1,0 +1,17 @@
+extends ../layouts/default
+
+block intro
+	.container
+block content
+	.container
+		h2 Operators
+		#operators-container.margin-top
+		a.btn.warm-blue(href='/operator') Create New
+block js
+	script.
+		function operatorSelected(op) {
+			window.location.href = "/operator/" + op._id;
+		} 
+
+	script(src='/js/wo-bundle.js')
+	

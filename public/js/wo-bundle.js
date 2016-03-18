@@ -33615,13 +33615,81 @@ module.exports = exports['default'];
 
 },{}],172:[function(require,module,exports){
 var React = require('react');
+
+CommentBox = React.createClass({
+	displayName: "CommentBox",
+
+	render: function () {
+		var comments = this.state.comments;
+
+		var existingComments = comments ? comments.map(function (c, i) {
+			return React.createElement(
+				"li",
+				{ key: i },
+				React.createElement(
+					"strong",
+					null,
+					c.createdBy.name.first,
+					":"
+				),
+				" ",
+				c.comment,
+				" "
+			);
+		}) : null;
+		return React.createElement(
+			"div",
+			null,
+			React.createElement("textarea", { value: this.state.comment, onChange: this.commentChange, rows: "3", placeholder: "New comment", className: "form-control" }),
+			React.createElement(
+				"div",
+				{ onClick: this.addComment, className: "btn btn-default" },
+				"Add"
+			),
+			React.createElement(
+				"ul",
+				null,
+				existingComments
+			)
+		);
+	},
+	commentChange: function (e) {
+		this.setState({
+			comment: e.target.value
+		});
+	},
+	addComment: function () {
+		if (this.props.onAdd) {
+			var comment = this.state.comment;
+			this.props.onAdd(comment, function (result) {
+				var comments = this.state.comments;
+				comments.unshift(result.workorderactivity);
+				this.setState({
+					comments: comments,
+					comment: ""
+				});
+			}.bind(this));
+		}
+	},
+	getInitialState: function () {
+		return {
+			comment: "",
+			comments: this.props.comments
+		};
+	}
+});
+
+module.exports = CommentBox;
+
+},{"react":161}],173:[function(require,module,exports){
+var React = require('react');
 var CustomerBox = React.createClass({
 	displayName: "CustomerBox",
 
 	render: function () {
 		var customer = this.props.data;
 		var displayName = this.customerName(customer);
-		var moreLink = customer && customer._id ? React.createElement(
+		var moreLink = !this.props.isCompact && customer && customer._id ? React.createElement(
 			"div",
 			{ className: "card-action" },
 			React.createElement(
@@ -33630,6 +33698,37 @@ var CustomerBox = React.createClass({
 				"Edit"
 			)
 		) : null;
+		var info = this.props.isCompact ? null : React.createElement(
+			"div",
+			{ className: "info" },
+			React.createElement(
+				"p",
+				null,
+				React.createElement(
+					"a",
+					{ href: 'tel:' + customer.phone },
+					" ",
+					customer.phone,
+					" "
+				)
+			),
+			React.createElement(
+				"p",
+				null,
+				React.createElement(
+					"a",
+					{ href: 'mailto:' + customer.email },
+					" ",
+					customer.email,
+					" "
+				)
+			),
+			React.createElement(
+				"p",
+				null,
+				customer.billingAddress
+			)
+		);
 		return React.createElement(
 			"div",
 			{ className: this.props.className, onClick: this.boxClicked },
@@ -33650,33 +33749,7 @@ var CustomerBox = React.createClass({
 						"  ",
 						displayName
 					),
-					React.createElement(
-						"p",
-						null,
-						React.createElement(
-							"a",
-							{ href: 'tel:' + customer.phone },
-							" ",
-							customer.phone,
-							" "
-						)
-					),
-					React.createElement(
-						"p",
-						null,
-						React.createElement(
-							"a",
-							{ href: 'mailto:' + customer.email },
-							" ",
-							customer.email,
-							" "
-						)
-					),
-					React.createElement(
-						"p",
-						null,
-						customer.billingAddress
-					)
+					info
 				),
 				moreLink
 			)
@@ -33701,7 +33774,7 @@ var CustomerBox = React.createClass({
 
 module.exports = CustomerBox;
 
-},{"react":161}],173:[function(require,module,exports){
+},{"react":161}],174:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = require('./customerBox');
 
@@ -33725,7 +33798,7 @@ var CustomerBoxList = React.createClass({
 
 module.exports = CustomerBoxList;
 
-},{"./customerBox":172,"react":161}],174:[function(require,module,exports){
+},{"./customerBox":173,"react":161}],175:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = require('./customerBox.js');
 var CustomerBoxList = require('./customerBoxList.js');
@@ -33937,7 +34010,7 @@ var CustomerLookup = React.createClass({
 
 module.exports = CustomerLookup;
 
-},{"./customerBox.js":172,"./customerBoxList.js":173,"react":161}],175:[function(require,module,exports){
+},{"./customerBox.js":173,"./customerBoxList.js":174,"react":161}],176:[function(require,module,exports){
 var React = require('react');
 
 var Operator = React.createClass({
@@ -33959,7 +34032,7 @@ var Operator = React.createClass({
 
 module.exports = Operator;
 
-},{"react":161}],176:[function(require,module,exports){
+},{"react":161}],177:[function(require,module,exports){
 var React = require('react');
 var Operator = require('./operator');
 var _ = require('underscore');
@@ -34024,7 +34097,7 @@ var OperatorPicker = React.createClass({
 
 module.exports = OperatorPicker;
 
-},{"./operator":175,"react":161,"underscore":171}],177:[function(require,module,exports){
+},{"./operator":176,"react":161,"underscore":171}],178:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = require('./customerBox');
 var CustomerLookup = require('./customerLookup');
@@ -34061,75 +34134,8 @@ var WO = React.createClass({
 			activities
 		);
 	},
-	renderJobHeader: function (w) {
-		var priceInfo = this.renderPriceInfo(w);
-		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' : w.status == woStatus.REJECTED ? 'red white-text' : '';
-		return React.createElement(
-			'div',
-			{ className: 'row ' },
-			React.createElement(
-				'div',
-				{ className: 'col s12 m3 big-font' },
-				w.jobNumber ? 'Job# ' + w.jobNumber : 'New',
-				' ',
-				React.createElement(
-					'div',
-					{ className: statusClass + ' chip' },
-					w.status
-				)
-			),
-			React.createElement(
-				'div',
-				{ className: 'col s12 m3 margin-top grey lighten-5' },
-				React.createElement(
-					'div',
-					{ className: 'switch margin' },
-					React.createElement(
-						'label',
-						null,
-						'In Store',
-						React.createElement('input', { type: 'checkbox' }),
-						React.createElement('span', { className: 'lever' }),
-						'On Site'
-					)
-				)
-			),
-			React.createElement(
-				'div',
-				{ className: 'col s12 m6' },
-				priceInfo
-			)
-		);
-	},
-	renderCustomer: function (w) {
-		var c = w.customer;
-		var key = c ? c._id : -1;
-		var lookup = React.createElement(CustomerLookup, { key: key, selectedCustomer: c, onChange: this.customerLookupChange, onNewCustomer: this.newCustomerChange });
-
-		return React.createElement(
-			'div',
-			{ className: 'customer-section' },
-			React.createElement(
-				'h4',
-				{ className: 'header' },
-				'Customer'
-			),
-			lookup
-		);
-	},
-	customerLookupChange: function (c) {
-		var w = this.state.workorder;
-		w.customer = c;
-		this.setState({
-			workorder: w,
-			createNewCustomer: false
-		});
-	},
-	newCustomerChange: function (c) {
-		this.setState({ newCustomer: c, createNewCustomer: c != null });
-	},
 	renderPriceInfo: function (w) {
-		var price = w.status == woStatus.DRAFT || this.state.edit['PRICE'] ? React.createElement(
+		var price = w.status == woStatus.DRAFT ? React.createElement(
 			'div',
 			null,
 			React.createElement(
@@ -34146,14 +34152,41 @@ var WO = React.createClass({
 					{ htmlFor: 'price-edit', className: 'active' },
 					'Price'
 				)
+			)
+		) : this.state.edit['PRICE'] ? React.createElement(
+			'div',
+			null,
+			React.createElement(
+				'div',
+				{ className: 'input-field left' },
+				React.createElement(
+					'i',
+					{ className: 'material-icons prefix' },
+					'attach_moneyu'
+				),
+				React.createElement('input', { id: 'price-edit', type: 'text', className: ' price', onChange: this.editPriceChange, value: this.state.editPrice }),
+				React.createElement(
+					'label',
+					{ htmlFor: 'price-edit', className: 'active' },
+					'Price'
+				)
 			),
 			React.createElement(
 				'div',
-				{ className: 'btn-floating ', onClick: this.update.bind(this, 'PRICE'), title: 'Save' },
+				{ className: 'btn-floating ', onClick: this.editDone.bind(this, 'PRICE'), title: 'Save' },
 				React.createElement(
 					'i',
 					{ className: 'material-icons white green-text' },
 					'done'
+				)
+			),
+			React.createElement(
+				'div',
+				{ className: 'btn-floating ', onClick: this.editCancel, title: 'Cancel Edit' },
+				React.createElement(
+					'i',
+					{ className: 'material-icons white red-text' },
+					'clear'
 				)
 			),
 			React.createElement('div', { className: 'clearfix' })
@@ -34185,6 +34218,12 @@ var WO = React.createClass({
 
 		return price;
 	},
+	editPriceChange: function (e) {
+		this.setState({ editPrice: e.target.value });
+	},
+	editDescriptionChange: function (e) {
+		this.setState({ editDescription: e.target.value });
+	},
 	priceChange: function (e) {
 		var w = this.state.workorder;
 		w.price = e.target.value;
@@ -34194,7 +34233,7 @@ var WO = React.createClass({
 	},
 	renderService: function (w) {
 
-		var description = w.status == woStatus.DRAFT || this.state.edit['DESCRIPTION'] ? React.createElement(
+		var description = w.status == woStatus.DRAFT ? React.createElement(
 			'div',
 			{ className: 'row' },
 			React.createElement(
@@ -34211,14 +34250,41 @@ var WO = React.createClass({
 					{ htmlFor: 'description', className: w.description ? 'active' : '' },
 					'Description of service'
 				)
+			)
+		) : this.state.edit['DESCRIPTION'] ? React.createElement(
+			'div',
+			{ className: 'row' },
+			React.createElement(
+				'div',
+				{ className: 'input-field left col s8' },
+				React.createElement(
+					'i',
+					{ className: 'material-icons prefix' },
+					'mode_edit'
+				),
+				React.createElement('textarea', { id: 'description', onChange: this.editDescriptionChange, className: 'materialize-textarea service-description', value: this.state.editDescription }),
+				React.createElement(
+					'label',
+					{ htmlFor: 'description', className: w.description ? 'active' : '' },
+					'Description of service'
+				)
 			),
 			React.createElement(
 				'div',
-				{ className: 'btn-floating ', onClick: this.update.bind(this, 'DESCRIPTION'), title: 'Save' },
+				{ className: 'btn-floating ', onClick: this.editDone.bind(this, 'DESCRIPTION'), title: 'Save' },
 				React.createElement(
 					'i',
 					{ className: 'material-icons white green-text' },
 					'done'
+				)
+			),
+			React.createElement(
+				'div',
+				{ className: 'btn-floating ', onClick: this.editCancel, title: 'Cancel Edit' },
+				React.createElement(
+					'i',
+					{ className: 'material-icons white red-text' },
+					'clear'
 				)
 			),
 			React.createElement('div', { className: 'clearfix' })
@@ -34244,7 +34310,7 @@ var WO = React.createClass({
 		);
 
 		var serviceItems = null;
-		if (w.status == woStatus.DRAFT || this.state.edit['ITEMS']) {
+		if (w.status == woStatus.DRAFT) {
 			// display checkboxes
 			var items = this.props.standardItems ? this.props.standardItems.map(function (item, item_i) {
 				var id = 'item' + item_i;
@@ -34261,15 +34327,6 @@ var WO = React.createClass({
 					)
 				);
 			}.bind(this)) : null;
-			var btnSave = w.status != woStatus.DRAFT ? React.createElement(
-				'div',
-				{ className: 'btn-floating ', onClick: this.update.bind(this, 'ITEMS'), title: 'Save' },
-				React.createElement(
-					'i',
-					{ className: 'material-icons white green-text' },
-					'done'
-				)
-			) : null;
 
 			serviceItems = React.createElement(
 				'div',
@@ -34278,11 +34335,60 @@ var WO = React.createClass({
 					'div',
 					{ className: 'row' },
 					items
+				)
+			);
+		} else if (this.state.edit['ITEMS']) {
+			var items = this.props.standardItems ? this.props.standardItems.map(function (item, item_i) {
+				var id = 'item' + item_i;
+				var checked = this.state.editItems && _.contains(this.state.editItems, item) ? 'checked' : '';
+
+				return React.createElement(
+					'div',
+					{ className: 'col s12 m6', key: id },
+					React.createElement('input', { type: 'checkbox', id: id, checked: checked, onChange: this.editItemChange.bind(this, item) }),
+					React.createElement(
+						'label',
+						{ htmlFor: id },
+						item
+					)
+				);
+			}.bind(this)) : null;
+			var buttons = React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'div',
+					{ className: 'btn-floating ', onClick: this.editDone.bind(this, 'ITEMS'), title: 'Save' },
+					React.createElement(
+						'i',
+						{ className: 'material-icons white green-text' },
+						'done'
+					)
+				),
+				React.createElement(
+					'div',
+					{ className: 'btn-floating ', onClick: this.editCancel, title: 'Cancel Edit' },
+					React.createElement(
+						'i',
+						{ className: 'material-icons white red-text' },
+						'clear'
+					)
+				),
+				' '
+			);
+
+			serviceItems = React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'div',
+					{ className: 'row margin-top' },
+					items
 				),
 				React.createElement(
 					'div',
 					{ className: 'row' },
-					btnSave
+					buttons
 				)
 			);
 		} else {
@@ -34346,46 +34452,82 @@ var WO = React.createClass({
 			serviceItems
 		);
 	},
-	updateDatabase: function (part) {
-		var w = this.state.workorder;
-		if (w.status == woStatus.DRAFT) return;
 
+	locationChange: function (e) {
+		var w = this.state.workorder;
+		w.location = e.target.checked ? 'On Site' : 'In Store';
+		this.setState({ workorder: w });
+		this.editDone('LOCATION');
+	},
+	editCancel: function () {
+		this.setState({ edit: [] });
+	},
+	editDone: function (part) {
+		var w = this.state.workorder;
 		var params = { field: part, _id: w._id };
+
 		switch (part) {
 			case 'DESCRIPTION':
-				params.description = w.description;
+				params.description = w.description = this.state.editDescription;
 				break;
 
 			case 'ITEMS':
-				params.items = w.items;
+				params.items = w.items = this.state.editItems;
 				break;
 
 			case 'PRICE':
-				params.price = w.price;
+				params.price = w.price = this.state.editPrice;
 				break;
 
 			case 'ASSIGNEE':
 				params.assignee = w.assignee._id;
 				break;
+
+			case 'LOCATION':
+				params.location = w.location;
+				break;
 		}
 
+		// update state
+		this.setState({ edit: [], workorder: w });
+		// update database
 		$.post('/api/workorder/updateField', params, this.serverUpdate).error(this.handleError);
-	},
-	update: function (part) {
-		this.updateDatabase(part);
-		var edit = [];
-		// or if you want multiple editable fields:
-		// var edit = this.state.edit;
-		// edit[part] = false;
-		this.setState({ edit: edit });
 	},
 	makeEditable: function (part) {
 		var edit = [];
 		edit[part] = true;
-		// or if you want multiple editable fields:
-		// var edit = this.state.edit;
-		// edit[part] = true;
-		this.setState({ edit: edit });
+		var editPrice, editDescription, editItems;
+
+		switch (part) {
+			case 'PRICE':
+				editPrice = this.state.workorder.price;
+				break;
+
+			case 'DESCRIPTION':
+				editDescription = this.state.workorder.description;
+				break;
+
+			case 'ITEMS':
+				editItems = this.state.workorder.items;
+				break;
+		}
+		this.setState({
+			edit: edit,
+			editPrice: editPrice,
+			editDescription: editDescription,
+			editItems: editItems
+		});
+	},
+	editItemChange: function (item) {
+		var editItems = this.state.editItems;
+		if (_.contains(editItems, item)) {
+			editItems = _.without(editItems, item);
+		} else {
+			editItems.push(item);
+		}
+		this.setState({
+			editItems: editItems
+		});
 	},
 	handleServiceItemChange: function (item) {
 		w = this.state.workorder;
@@ -34477,8 +34619,106 @@ var WO = React.createClass({
 			}]);
 		} catch (e) {
 			console.log(e);
-			alert("Ooops! someting is not working.");
+			this.showError("Ooops! someting is not working.");
 		}
+	},
+	assignTo: function () {
+		if (this.state.operators) {
+			this.setState({ showOperatorPicker: !this.state.showOperatorPicker });
+		} else {
+			$.get("/api/operator/list-names", function (result) {
+				this.setState({
+					showOperatorPicker: true,
+					operators: result.operators
+				});
+			}.bind(this));
+		}
+	},
+	assigneeSelected: function (operator) {
+		var w = this.state.workorder;
+		w.assignee = operator;
+		this.setState({
+			showOperatorPicker: false,
+			workorder: w
+		});
+		this.editDone("ASSIGNEE");
+	},
+	actionNoteChanged: function (e) {
+		this.setState({
+			actionNote: e.target.value
+		});
+	},
+	showActionDetails: function (actionType) {
+		this.setState({
+			showActionDetail: true,
+			actionType: actionType
+		});
+	},
+	submitAction: function () {
+		var note = this.state.actionNote;
+		switch (this.state.actionType) {
+			case 'WAIT FOR PART':
+				$.post('/workorder/waitForPart', { note: note }, serverUpdate);
+				break;
+
+			case 'WAIT FOR CUSTOMER':
+				$.post('/workorder/waitForCustomer', { note: note }, serverUpdate);
+				break;
+
+			case 'REOPEN':
+				$.post('/workorder/reopen', { note: note }, serverUpdate);
+				break;
+		}
+
+		this.setState({
+			showActionDetail: false,
+			actionType: null,
+			actionNote: null
+		});
+	},
+	reject: function () {
+		$.post('/workorder/reject', serverUpdate);
+	},
+	complete: function () {
+		$.post('/workorder/complete', serverUpdate);
+	},
+	startProgress: function () {
+		$.post('/workorder/startProgress', serverUpdate);
+	},
+	serverUpdate: function (result) {
+		// console.log("back from server", result);
+		// In most cases we shouldn't need to refresh the state as it is already in sync
+		swal({ title: "Success!", text: "Job updated.", type: "success", timer: 1000, showConfirmButton: false, animation: "slide-from-top" });
+	},
+	saveCustomer: function (customer, cb) {
+		$.post("/api/customer/create", customer, function (result) {
+			console.log("/customer/save", result);
+			cb(result);
+		});
+	},
+
+	saveWorkOrder: function (workOrder, cb) {
+		$.post("/api/workorder/create", workOrder, function (result) {
+			cb(result);
+		});
+	},
+
+	getNameObject: function (name) {
+		if (!name) return null;
+
+		var first,
+		    last,
+		    delimiterIndex = name.indexOf("-");
+		if (delimiterIndex != -1) {
+			first = name.substring(0, delimiterIndex - 1).trim();
+			last = name.substring(delimiterIndex + 1).trim();
+		} else {
+			// 'Paul Steve Panakkal'.split(' ').slice(0, -1).join(' '); // returns "Paul Steve"
+			// 'Paul Steve Panakkal'.split(' ').slice(-1).join(' '); // returns "Panakkal"
+			first = name.split(' ').slice(0, -1).join(' ');
+			last = name.split(' ').slice(-1).join(' ');
+		}
+		return { first: first, last: last };
 	},
 	renderActions: function (w) {
 		var btnCreate = !w.jobNumber ? React.createElement(
@@ -34586,106 +34826,72 @@ var WO = React.createClass({
 			actionDetails
 		);
 	},
-	assignTo: function () {
-		if (this.state.operators) {
-			this.setState({ showOperatorPicker: !this.state.showOperatorPicker });
-		} else {
-			$.get("/api/operator/list-names", function (result) {
-				this.setState({
-					showOperatorPicker: true,
-					operators: result.operators
-				});
-			}.bind(this));
-		}
+	renderJobHeader: function (w) {
+		var priceInfo = this.renderPriceInfo(w);
+		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' : w.status == woStatus.REJECTED ? 'red white-text' : '';
+		return React.createElement(
+			'div',
+			{ className: 'row ' },
+			React.createElement(
+				'div',
+				{ className: 'col s12 m3 big-font' },
+				w.jobNumber ? 'Job# ' + w.jobNumber : 'New',
+				' ',
+				React.createElement(
+					'div',
+					{ className: statusClass + ' chip' },
+					w.status
+				)
+			),
+			React.createElement(
+				'div',
+				{ className: 'col s12 m3 margin-top grey lighten-5' },
+				React.createElement(
+					'div',
+					{ className: 'switch margin' },
+					React.createElement(
+						'label',
+						null,
+						'In Store',
+						React.createElement('input', { type: 'checkbox', onChange: this.locationChange, checked: w.location == 'On Site' }),
+						React.createElement('span', { className: 'lever' }),
+						'On Site'
+					)
+				)
+			),
+			React.createElement(
+				'div',
+				{ className: 'col s12 m6' },
+				priceInfo
+			)
+		);
 	},
-	assigneeSelected: function (operator) {
+	renderCustomer: function (w) {
+		var c = w.customer;
+		var key = c ? c._id : -1;
+		var lookup = React.createElement(CustomerLookup, { key: key, selectedCustomer: c, onChange: this.customerLookupChange, onNewCustomer: this.newCustomerChange });
+
+		return React.createElement(
+			'div',
+			{ className: 'customer-section' },
+			React.createElement(
+				'h4',
+				{ className: 'header' },
+				'Customer'
+			),
+			lookup
+		);
+	},
+	customerLookupChange: function (c) {
 		var w = this.state.workorder;
-		w.assignee = operator;
+		w.customer = c;
 		this.setState({
-			showOperatorPicker: false,
-			workorder: w
-		});
-		this.updateDatabase("ASSIGNEE");
-	},
-	actionNoteChanged: function (e) {
-		this.setState({
-			actionNote: e.target.value
+			workorder: w,
+			createNewCustomer: false
 		});
 	},
-	showActionDetails: function (actionType) {
-		this.setState({
-			showActionDetail: true,
-			actionType: actionType
-		});
-	},
-	submitAction: function () {
-		var note = this.state.actionNote;
-		switch (this.state.actionType) {
-			case 'WAIT FOR PART':
-				$.post('/workorder/waitForPart', { note: note }, serverUpdate);
-				break;
-
-			case 'WAIT FOR CUSTOMER':
-				$.post('/workorder/waitForCustomer', { note: note }, serverUpdate);
-				break;
-
-			case 'REOPEN':
-				$.post('/workorder/reopen', { note: note }, serverUpdate);
-				break;
-		}
-
-		this.setState({
-			showActionDetail: false,
-			actionType: null,
-			actionNote: null
-		});
-	},
-	reject: function () {
-		$.post('/workorder/reject', serverUpdate);
-	},
-	complete: function () {
-		$.post('/workorder/complete', serverUpdate);
-	},
-	startProgress: function () {
-		$.post('/workorder/startProgress', serverUpdate);
-	},
-	serverUpdate: function (result) {
-		console.log("back from server", result);
-
-		// In most cases we shouldn't need to refresh the state as it is already in sync
-		// this.setState({
-		// 	workorder: result.workorder
-		// });
-	},
-	saveCustomer: function (customer, cb) {
-		$.post("/api/customer/create", customer, function (result) {
-			console.log("/customer/save", result);
-			cb(result);
-		});
-	},
-
-	saveWorkOrder: function (workOrder, cb) {
-		$.post("/api/workorder/create", workOrder, function (result) {
-			cb(result);
-		});
-	},
-
-	getNameObject: function (name) {
-		if (!name) return null;
-
-		var first,
-		    last,
-		    delimiterIndex = name.indexOf("-");
-		if (delimiterIndex != -1) {
-			first = name.substring(0, delimiterIndex - 1).trim();
-			last = name.substring(delimiterIndex + 1).trim();
-		} else {
-			// 'Paul Steve Panakkal'.split(' ').slice(0, -1).join(' '); // returns "Paul Steve"
-			// 'Paul Steve Panakkal'.split(' ').slice(-1).join(' '); // returns "Panakkal"
-			first = name.split(' ').slice(0, -1).join(' ');
-			last = name.split(' ').slice(-1).join(' ');
-		}
-		return { first: first, last: last };
+	newCustomerChange: function (c) {
+		this.setState({ newCustomer: c, createNewCustomer: c != null });
 	},
 	getInitialState: function () {
 		return {
@@ -34700,6 +34906,7 @@ var WO = React.createClass({
 			edit: [],
 			editDescription: false,
 			editItems: false,
+			editPrice: null,
 			showOperatorPicker: false
 		};
 	}
@@ -34707,7 +34914,177 @@ var WO = React.createClass({
 
 module.exports = WO;
 
-},{"./customerBox":172,"./customerLookup":174,"./operator":175,"./operatorPicker":176,"./woStatus":178,"async":2,"jquery":3,"numeral":4,"react":161,"sweetalert":170,"underscore":171}],178:[function(require,module,exports){
+},{"./customerBox":173,"./customerLookup":175,"./operator":176,"./operatorPicker":177,"./woStatus":182,"async":2,"jquery":3,"numeral":4,"react":161,"sweetalert":170,"underscore":171}],179:[function(require,module,exports){
+var React = require('react');
+var CustomerBox = require('./customerBox');
+var CommentBox = require('./commentBox');
+var Operator = require('./operator');
+var _ = require('underscore');
+
+var WoCompact = React.createClass({
+	displayName: 'WoCompact',
+
+	render: function () {
+
+		var wo = this.props.data;
+		var customer = wo.customer ? React.createElement(CustomerBox, { data: wo.customer, isCompact: this.state.isCustomerCompact, onSelect: this.toggleCustomerCompact }) : null;
+		var operator = wo.assignee ? React.createElement(Operator, { data: wo.assignee }) : null;
+		var list = wo.items.map(function (item, i) {
+			return React.createElement(
+				'li',
+				{ className: 'collection-item', key: i },
+				item
+			);
+		}.bind(this));
+
+		return React.createElement(
+			'div',
+			{ className: 'wo-comapct' },
+			React.createElement(
+				'div',
+				{ className: 'col s12 m6' },
+				React.createElement(
+					'div',
+					{ className: 'card ' },
+					React.createElement(
+						'div',
+						{ className: 'card-content' },
+						React.createElement(
+							'span',
+							{ className: 'card-title' },
+							'JOB# ',
+							wo.jobNumber,
+							' ',
+							React.createElement(
+								'span',
+								{ className: 'chip right' },
+								wo.status
+							)
+						),
+						React.createElement(
+							'p',
+							{ className: 'truncate' },
+							wo.description
+						),
+						React.createElement(
+							'ul',
+							{ className: 'collection' },
+							list
+						)
+					),
+					React.createElement(
+						'div',
+						{ className: 'card-action' },
+						customer,
+						operator,
+						React.createElement(
+							'a',
+							{ href: '/wo/jn/' + wo.jobNumber, className: 'right ' },
+							'Details'
+						)
+					)
+				)
+			)
+		);
+	},
+	toggleCustomerCompact: function () {
+		this.setState({ isCustomerCompact: !this.state.isCustomerCompact });
+	},
+	getInitialState: function () {
+		return { isCustomerCompact: true };
+	}
+});
+
+module.exports = WoCompact;
+
+},{"./commentBox":172,"./customerBox":173,"./operator":176,"react":161,"underscore":171}],180:[function(require,module,exports){
+var React = require('react');
+var WoCompact = require('./woCompact');
+
+var WoList = React.createClass({
+	displayName: 'WoList',
+
+	render: function () {
+		var list = this.props.data ? this.props.data.map(function (item) {
+			return React.createElement(WoCompact, { key: item._id, data: item, onSelect: this.itemSelect });
+		}.bind(this)) : null;
+		return React.createElement(
+			'div',
+			{ className: 'workorder-box-list row margin-top' },
+			list
+		);
+	},
+	itemSelect: function (wo) {
+		if (this.props.onSelect) {
+			this.props.onSelect(wo);
+		}
+	}
+});
+
+module.exports = WoList;
+
+},{"./woCompact":179,"react":161}],181:[function(require,module,exports){
+var React = require('react');
+var WoList = require('./woList.js');
+
+var WoLookup = React.createClass({
+	displayName: 'WoLookup',
+
+	render: function () {
+		var matchedItems = this.renderMatchdItems();
+		return React.createElement(
+			'div',
+			{ className: 'wo-lookup' },
+			React.createElement(
+				'div',
+				{ className: 'row' },
+				React.createElement(
+					'div',
+					{ className: 'input-field col s6' },
+					React.createElement('input', { id: 'search_token', type: 'text', className: 'validate', value: this.state.search_token, onChange: this.searchTokenChanged }),
+					React.createElement(
+						'label',
+						{ htmlFor: 'search_token' },
+						'Search'
+					)
+				)
+			),
+			matchedItems
+		);
+	},
+	renderMatchdItems: function () {
+		return this.state.searchResult ? React.createElement(WoList, { data: this.state.searchResult, onSelect: this.woSelect }) : React.createElement(
+			'div',
+			null,
+			'-'
+		);
+	},
+	woSelect: function (wo) {
+		alert('redierct');
+		console.log(wo);
+	},
+	searchTokenChanged: function (e) {
+		var token = e.target.value;
+		if (token && token.length > 2) {
+			$.get('/api/workorder/search?token=' + token, function (result) {
+				this.setState({ searchResult: result.workorders });
+			}.bind(this));
+		}
+		this.setState({ search_token: token });
+	},
+
+	getInitialState: function () {
+		return {
+			searchResult: null,
+			search_token: ''
+		};
+	}
+
+});
+
+module.exports = WoLookup;
+
+},{"./woList.js":180,"react":161}],182:[function(require,module,exports){
 const DRAFT = 'DRAFT';
 const IN_PROGRESS = 'IN PROGRESS';
 const QUOTE = 'QUOTE';
@@ -34726,38 +35103,32 @@ module.exports = {
     REJECTED: REJECTED
 };
 
-},{}],179:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var WO = require('./components/wo.js');
-var CustomerLookup = require('./components/customerLookup.js');
+var WoLookup = require('./components/woLookup.js');
 var OperatorPicker = require('./components/operatorPicker.js');
-var async = require('async');
 
+// TODO: Maybe seperate these out
 $(document).ready(function () {
+	var woContainer = document.getElementById('wo-container');
+	if (woContainer) {
+		ReactDOM.render(React.createElement(WO, { standardItems: standardItems, data: woObject }), woContainer);
+	}
 
-	ReactDOM.render(React.createElement(WO, { standardItems: standardItems, data: woObject }), document.getElementById('wo-container'));
-	/*
- ReactDOM.render(
- 	<CustomerLookup onChange={customerLookupChange} />,
- 	document.getElementById('customer-lookup-container')
- );
- 
- // Operators - Only needed after work item has been saved	
- $.get("/api/operator/list-names", function(result){
- 	ReactDOM.render(
- 		<OperatorPicker data={result.operators} onSelect={assignToOperator} />,
- 		document.getElementById('operator-picker')
- 	);
- });
- $("#operator-picker").hide();
- $("#btn-assignto").on('click', function(){ 
- 	 $("#operator-picker").fadeToggle("slow")
- });
- */
+	var woLookupContainer = document.getElementById('wo-lookup-container');
+	if (woLookupContainer) {
+		ReactDOM.render(React.createElement(WoLookup, null), woLookupContainer);
+	}
+
+	var operatorsContainer = document.getElementById('operators-container');
+	if (operatorsContainer) {
+		$.get("/api/operator/list-names", function (result) {
+			ReactDOM.render(React.createElement(OperatorPicker, { onSelect: operatorSelected, data: result.operators }), operatorsContainer);
+		});
+	}
 });
 
-function assignToOperator(operator) {}
-
-},{"./components/customerLookup.js":174,"./components/operatorPicker.js":176,"./components/wo.js":177,"async":2,"jquery":3,"react":161,"react-dom":5}]},{},[179]);
+},{"./components/operatorPicker.js":177,"./components/wo.js":178,"./components/woLookup.js":181,"jquery":3,"react":161,"react-dom":5}]},{},[183]);

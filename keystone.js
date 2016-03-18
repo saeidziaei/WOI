@@ -25,7 +25,17 @@ keystone.init({
 	'auto update': true,
 	'session': true,
 	'auth': true,
-	'user model': 'User'
+	'user model': 'User',
+	'signin redirect': function(user, req, res){
+		if (user.isManager)
+			res.redirect('/');
+		else if (user.isOperator)
+			res.redirect('/jn');
+		else if (user.isCustomer)
+			res.redirect('/tracking');
+		else if (user.isAdmin)
+			res.redirect('/keystone');
+	}
 
 });
 
