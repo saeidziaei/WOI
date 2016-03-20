@@ -43,6 +43,16 @@ exports.create = function(req, res) {
 		
 	*/
 }
+function createTransitionActivity(activity){
+	return new WorkOrderActivity.model({
+		activityType: activity.activityType,
+		transition:{
+			fromStatus: activity.fromStatus,
+			toStatus: activity.toStatus
+		},	
+		comment: "Changed Status"
+	});
+}
 function createAssignmentActivity(activity){
 	return new WorkOrderActivity.model({
 		activityType: activity.activityType,
@@ -63,7 +73,8 @@ function createModifyActivity(activity){
 }
 function insertActitivy (activity, next){
 	var item = activity.activityType == 'modify' ? createModifyActivity(activity) : 
-			   activity.activityType == 'assignment' ? createAssignmentActivity(activity) : null;
+			   activity.activityType == 'assignment' ? createAssignmentActivity(activity) : 
+			   activity.activityType == 'transition' ? createTransitionActivity(activity) : null;
 
     if (!item) next(null);
 	
@@ -76,7 +87,26 @@ function insertActitivy (activity, next){
 		next(err);
 	})
 }
+exports.changeStatus = function (req, res) {
+	data = req.body;
+	var activity = { activityType: 'transition', user: req.user};
+	WorkOrder.model.findById(data._id, function(err, w){
+		// TODO: Check for valid status transitions
+		activity.fromStatus = w.status;
+		activity.toStatus = data.status;
+		activity.workorder = w;
 
+		w.status = data.status;
+
+		w.save(function(err){
+			if (err) return res.apiError('database update error', err);
+			insertActitivy(activity, function(err){
+				if (err) return res.apiError('activity insert error', err);
+				return res.apiResponse({workorder: w});
+			});
+		})
+	});	
+}
 exports.updateField = function(req, res){
 	data = req.body;
 	var activity = { field: data.field, user: req.user};
@@ -164,10 +194,15 @@ exports.list = function(req, res) {
 			
 		});
 	});
-		
-	
 }
 
+exports.getActivities = function(req, res) {
+	var q = WorkOrderActivity.model.find({workorder: req.params.workorder}).populate({path: "createdBy", select: "name"}); 
+	q.exec(function(err, results){
+		if (err) return res.apiError('database read error', err);
+		res.apiResponse({	activities: results	});
+	});
+}
 
 exports.search = function (req, res) {
 

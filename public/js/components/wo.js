@@ -6,10 +6,12 @@ var Operator = require('./operator');
 var swal = require('sweetalert');
 var numeral = require('numeral');
 
+var dateFormat = require('dateformat');
 var _ = require("underscore");
 var async = require('async');
 var $ = require('jquery');
 var woStatus = require('./woStatus');
+var Loader = require('react-loader');
 
 var WO = React.createClass({
 
@@ -276,12 +278,67 @@ var WO = React.createClass({
 		});
 	},
 	renderActivities: function(w){
-		return (<div className='activities-section'>
-			<h4 className='header'>Activities</h4>
-			<div className='row'>
-				Coming Soon !!
-			</div>
-		</div>)
+		if (this.state.showActivities){
+			var items = <div>no activities yet</div>;
+			var activities = this.state.activities; 
+			if (activities) {
+				var filter = this.state.activitiesFilter; 
+				if (filter){
+					activities = _.filter(activities, function(a){
+						return a.activityType == filter;
+					})
+				}
+				items = _.sortBy(activities, 'createdAt').reverse()
+					.map(function(item, i){
+						var extraInfo = item.activityType == 'modify' ? (<span>from <strong>{item.modify.fromValue}</strong> to <strong>{item.modify.toValue}</strong></span>) :
+										item.activityType == 'transition' && item.transition ? (<span>from <strong>{item.transition.fromStatus}</strong> to <strong>{item.transition.toStatus}</strong></span>) : null;
+						var op = item.createdBy && item.createdBy.name ? item.createdBy.name.first + " " + item.createdBy.name.last : ""; 
+						return <div className={'activity-' +  item.activityType} key={item._id}> 
+							<div className='chip'>{op}</div>  {dateFormat(item.createdAt, 'fullDate')} | {item.comment} | {extraInfo} </div>
+				})
+				
+			}
+			  
+			return (<div className='activities-section'>
+				<h4 className='header'>Activities</h4>
+				{this.state.activitiesLoading ?
+					<Loader />
+				:
+				<div className='row'>
+					<div className='btn grey margin' onClick={this.filterActivities.bind(this, 'modify')}>Show Only Field Changes</div>
+					<div className='btn grey margin' onClick={this.filterActivities.bind(this, 'transition')}>Show Only Status Changes</div>
+					<div className='btn grey margin' onClick={this.filterActivities.bind(this, 'assignment')}>Show Only Assignee Changes</div>
+					<div className='btn green lighten-3 grey-text margin' onClick={this.filterActivities.bind(this, '')}>Reset Filter</div>
+					{items}
+				</div>
+				}
+			</div>)
+		} else {
+			return this.state.workorder._id ? 
+			<div className='btn warm-blue' onClick={this.toggleActivities}>Show Activities</div> :
+			null;
+		}
+	},
+	filterActivities: function(type){
+		this.setState({activitiesFilter: type});	
+	},
+	toggleActivities: function(){
+		if (!this.state.activities){
+			this.setState({activitiesLoading: true});
+			var self = this;
+			$.get("/api/workorder/getActivities/" +  self.state.workorder._id ,function(result){
+				self.setState({
+					activities: result.activities,
+					showActivities : !self.state.showActivities
+				});
+			})
+			.error(this.handleError)
+			.always(function(){
+				self.setState({activitiesLoading: false});
+			});
+		} else {
+			this.setState({showActivities : !this.state.showActivities});
+		}	
 	},
 	handleError: function(err){
 		console.log(err, "err.responseJSON.error is going to be used");
@@ -401,14 +458,20 @@ var WO = React.createClass({
 			actionNote: null
 		});
 	},
-	reject: function(){
-		$.post('/workorder/reject', serverUpdate);
-	},
-	complete: function(){
-		$.post('/workorder/complete', serverUpdate);
-	},
-	startProgress: function(){
-		$.post('/workorder/startProgress', serverUpdate);
+	changeStatus: function(newStatus){
+		$.post('/api/workorder/changeStatus', 
+			{
+				_id : this.state.workorder._id,
+				status: newStatus
+			}, 
+			function(result) {
+				var w = this.state.workorder;
+				w.status = newStatus;
+				this.setState({workorder: w});
+				
+				this.serverUpdate(result);
+			}.bind(this))
+		.error(this.handleError);
 	},
 	serverUpdate: function(result){
 		// console.log("back from server", result);
@@ -444,13 +507,15 @@ var WO = React.createClass({
 		return {first: first, last: last};
 	},
 	renderActions: function(w){
+		var btnDevStartOver  = <div className='btn orange lighten-1' onClick={this.changeStatus.bind(this, woStatus.QUOTE)}>Start Over From Quote</div>;
+		
 		var btnCreate = !w.jobNumber ? <div className='btn' onClick={this.create}>Create</div> : null;
 		var btnStart  = w.status == woStatus.QUOTE || w.status == woStatus.WAIT_FOR_PART || w.status == woStatus.WAIT_FOR_CUSTOMER ?
 				<div>
-					<div className='btn' onClick={this.startProgress}>Start Progress</div>
+					<div className='btn' onClick={this.changeStatus.bind(this, woStatus.IN_PROGRESS)}>Start Progress</div>
 					<em>* Customer has accepted the quote</em>
 				</div> : null;
-		var btnReject  = w.status == woStatus.QUOTE ?  <div className='btn red lighten-1' onClick={this.reject}>Reject</div> : null;
+		var btnReject  = w.status == woStatus.QUOTE ?  <div className='btn red lighten-1' onClick={this.changeStatus.bind(this, woStatus.REJECTED)}>Reject</div> : null;
 		var btnWaitForPart = w.status == woStatus.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text' onClick={this.showActionDetails.bind(this, 'WAIT FOR PART')}>Wait For Part</div> : null;
 		var btnWaitForCustomer = w.status == woStatus.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text'  onClick={this.showActionDetails.bind(this, 'WAIT FOR CUSTOMER')}>Wait For Customer</div> : null;
 		var assignee = w.assignee ? <div>
@@ -463,7 +528,7 @@ var WO = React.createClass({
 									<div className='btn' onClick={this.assignTo}>Assign To ...</div>
 									: null;
 		var operatorPicker = this.state.showOperatorPicker ? <OperatorPicker data={this.state.operators} onSelect={this.assigneeSelected} /> : null;
-		var btnComplete = w.status == woStatus.IN_PROGRESS ? <div className='btn green lighten-1'  onClick={this.complete}>Complete</div> : null;
+		var btnComplete = w.status == woStatus.IN_PROGRESS ? <div className='btn green lighten-1'  onClick={this.changeStatus.bind(this, woStatus.COMPLETED)}>Complete</div> : null;
 		var btnReopen = w.status == woStatus.COMPLETED ? <div className='btn'             onClick={this.showActionDetails.bind(this, 'REOPEN')}>Re Open</div> : null;
 		var actionDetails = this.state.showActionDetail ?
 					(<div className='row'>
@@ -478,6 +543,7 @@ var WO = React.createClass({
 		return (
 			<div className='section-actions'>
 				<hr/>
+				{btnDevStartOver}
 				{assignee}{operatorPicker}
 				{btnCreate}
 				{btnStart}
@@ -493,7 +559,8 @@ var WO = React.createClass({
 	renderJobHeader: function(w){
 		var priceInfo = this.renderPriceInfo(w);
 		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' :
-						 w.status == woStatus.REJECTED ? 'red white-text' : '';
+						 w.status == woStatus.REJECTED ? 'red white-text' : 
+						 w.status == woStatus.COMPLETED ? 'blue white-text' : '';
 		return <div className='row '>
 			<div className='col s12 m3 big-font'>
 				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={statusClass + ' chip'}>{w.status}</div>
@@ -538,11 +605,6 @@ var WO = React.createClass({
 	},
 	getInitialState : function(){
 		return {
-			initialValues: {
-				price: this.props.data.price,
-				description: this.props.data.description,
-				items: this.props.data.items
-			},
 			workorder: this.props.data,
 			newCustomer: null,
 			createNewCustomer: false,
@@ -550,7 +612,11 @@ var WO = React.createClass({
 			editDescription: false,
 			editItems: false,
 			editPrice: null,
-			showOperatorPicker: false
+			showOperatorPicker: false,
+			activities: null,
+			showActivities: false,
+			activitiesLoading: false,
+			activitiesFilter: null
 		}
 	},
 });

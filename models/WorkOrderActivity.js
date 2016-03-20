@@ -21,8 +21,8 @@ WorkOrderActivity.add({
 	comment: { type: String, required: true, initial: false },
 	// only when type = transition
 	transition: {
-		fromState: { type: String, initial: false },
-		toState: { type: String, initial: false }
+		fromStatus: { type: String, initial: false },
+		toStatus: { type: String, initial: false }
 	},
 	// only when type = modify
 	modify: {
