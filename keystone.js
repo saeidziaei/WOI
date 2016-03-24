@@ -1,3 +1,4 @@
+console.log("Every big journey starts with a little step.");
 // Simulate config options from your production environment by
 // customising the .env file in your project's root folder.
 require('dotenv').load();
