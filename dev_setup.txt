@@ -3,3 +3,5 @@ mongod --storageEngine=mmapv1 --dbpath c:\mongo\data
 -- del c:\mongo\data\mongod.lock
 
 watchify -t [ babelify --presets [ react ] ] ./public/js/wo.jsx -o ./public/js/wo-bundle.js -v
+
+git push github-woi master
