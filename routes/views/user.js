@@ -47,34 +47,41 @@ exports = module.exports = function(req, res){
 	// view.on('post', { action: 'customer' }, function(next) {
 	view.on('post', function(next) {
 		var updater;
+		var redirectPath;
 		if (locals.user && locals.user._id){
 			updater = locals.user.getUpdateHandler(req);
 		} else {
 			var newEntity = new User.model();
 			switch (req.body.action){
-				case 'customer':
+				case 'customer': 
 					newEntity.isCustomer = true;
 					break;
 					
 				case 'operator':
 					newEntity.isOperator = true;
-					newEntity.password = "1";
 					break;
 					
 			}
 			updater = newEntity.getUpdateHandler(req);
 		}
 		
+		var item = req.body;
+		if (item.password){
+			item.password_confirm = item.password;
+		}
+		item.isViewerOnly = item.isViewerOnly == 'on'; 
 		
-		updater.process(req.body, {
+		updater.process(item, {
 			flashErrors: true,
-			fields: 'name, company, email, phone, billingAddress, shippingAddress, ABN, password',
+			fields: 'name, company, email, phone, billingAddress, shippingAddress, ABN, password, isViewerOnly',
 			errorMessage: 'There was a problem saving database record:'
 		}, function(err) {
 			if (err) {
 				locals.validationErrors = err.errors;
 			} else {
 				locals.submitted = true;
+				req.flash('success', 'Operator saved!');
+				res.redirect("/operators");
 			}
 			next();
 		});

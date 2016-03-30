@@ -25,12 +25,13 @@ var WO = React.createClass({
 		var service = this.renderService(workorder);
 		var actions = this.renderActions(workorder);
 		var activities = this.renderActivities(workorder);
-
+		var commentSection = this.renderCommentSection(workorder);
 		return <div>
 			{jobHeader}
 			{customer}
 			{service}
 			{actions}
+			{commentSection}
 			{activities}
 		</div>
 	},
@@ -276,8 +277,40 @@ var WO = React.createClass({
 		this.setState({
 			workorder: w
 		});
+	}, 
+	renderCommentSection: function(w){
+		return w._id ? <div className='comment-section'>
+				<h4 className='header'>Add Comment</h4>
+				<div className='row'>
+					<div className='input-field left col s8'>
+						<i className='material-icons prefix'>chat_bubble_outline</i>
+						<textarea  id='comment' onChange={this.commentChange} className='materialize-textarea' value={this.state.comment} />
+					</div>
+					<div className='btn warm-blue' onClick={this.saveComment} title='Save'>OK</div>
+					<div className='clearfix'/>
+				</div>
+			</div> :
+			null;
+	},
+	commentChange: function (e){
+		this.setState({comment: e.target.value});	
+	},
+	saveComment: function(){
+		$.post('/api/workorder/addComment', 
+				{
+					_id: this.state.workorder._id,
+					comment: this.state.comment
+				}, 
+			this.serverUpdate)
+			.error(this.handleError);
+		
+		this.setState({comment: ""});	
 	},
 	renderActivities: function(w){
+		var toggleBtn = w._id ? 
+			<div className='btn warm-blue' onClick={this.toggleActivities}>{this.state.showActivities ? "Hide Activities" :  "Show Activities"}</div> :
+			null;
+			
 		if (this.state.showActivities){
 			var items = <div>no activities yet</div>;
 			var activities = this.state.activities; 
@@ -290,12 +323,19 @@ var WO = React.createClass({
 				}
 				items = _.sortBy(activities, 'createdAt').reverse()
 					.map(function(item, i){
+						
 						var extraInfo = item.activityType == 'modify' ? (<span>from <strong>{item.modify.fromValue}</strong> to <strong>{item.modify.toValue}</strong></span>) :
-										item.activityType == 'transition' && item.transition ? (<span>from <strong>{item.transition.fromStatus}</strong> to <strong>{item.transition.toStatus}</strong></span>) : null;
-						var op = item.createdBy && item.createdBy.name ? item.createdBy.name.first + " " + item.createdBy.name.last : ""; 
-						return <div className={'activity-' +  item.activityType} key={item._id}> 
-							<div className='chip'>{op}</div>  {dateFormat(item.createdAt, 'fullDate')} | {item.comment} | {extraInfo} </div>
-				})
+										item.activityType == 'transition' && item.transition ? (<span>from <strong>{item.transition.fromStatus}</strong> to <strong>{item.transition.toStatus}</strong></span>) : 
+										item.activityType == 'assignment' && item.assignedTo ? (<span>assigned to <strong>{this.getName(item.assignedTo)}</strong></span>) : 
+										null;
+						var activityColor = item.activityType == 'comment' ? 'blue' :
+											item.activityType == 'modify' ? 'red' :
+											item.activityType == 'transition' ? 'yellow' :
+											item.activityType == 'assignment' ? 'green' : "";
+						var op = item.createdBy ? this.getName(item.createdBy) : "";  
+						return <div className='card activity-card'  key={item._id}> 
+							<div className={'filler-child lighten-2 ' +  activityColor}/> {dateFormat(item.createdAt, 'fullDate')} <div className='chip'>{op}</div>  {item.comment}  {extraInfo} </div>
+				}.bind(this))
 				
 			}
 			  
@@ -305,19 +345,22 @@ var WO = React.createClass({
 					<Loader />
 				:
 				<div className='row'>
-					<div className='btn grey margin' onClick={this.filterActivities.bind(this, 'modify')}>Show Only Field Changes</div>
-					<div className='btn grey margin' onClick={this.filterActivities.bind(this, 'transition')}>Show Only Status Changes</div>
-					<div className='btn grey margin' onClick={this.filterActivities.bind(this, 'assignment')}>Show Only Assignee Changes</div>
-					<div className='btn green lighten-3 grey-text margin' onClick={this.filterActivities.bind(this, '')}>Reset Filter</div>
+					{toggleBtn}
+					<div className='btn blue margin' onClick={this.filterActivities.bind(this, 'comment')}>Comments</div>
+					<div className='btn red margin' onClick={this.filterActivities.bind(this, 'modify')}>Field Changes</div>
+					<div className='btn yellow black-text margin' onClick={this.filterActivities.bind(this, 'transition')}>Status Changes</div>
+					<div className='btn green margin' onClick={this.filterActivities.bind(this, 'assignment')}>Assignee Changes</div>
+					<div className='btn warm-blue margin' onClick={this.filterActivities.bind(this, '')}>Show All</div>
 					{items}
 				</div>
 				}
 			</div>)
 		} else {
-			return this.state.workorder._id ? 
-			<div className='btn warm-blue' onClick={this.toggleActivities}>Show Activities</div> :
-			null;
+			return toggleBtn;
 		}
+	},
+	getName: function(o){
+		return o.name ? o.name.first + " " + o.name.last : "";
 	},
 	filterActivities: function(type){
 		this.setState({activitiesFilter: type});	
@@ -616,7 +659,8 @@ var WO = React.createClass({
 			activities: null,
 			showActivities: false,
 			activitiesLoading: false,
-			activitiesFilter: null
+			activitiesFilter: null,
+			comment: ""
 		}
 	},
 });

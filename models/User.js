@@ -17,6 +17,7 @@ User.add({
 	isAdmin: { type: Boolean, label: 'Admin', index: true },
 	isManager: { type: Boolean, label: 'Manager/ Owner' },
 	isOperator: { type: Boolean, label: 'Operator' },
+	isViewerOnly: { type: Boolean, label: 'Viewer Only' },
 	isCustomer: { type: Boolean, label: 'Customer' },
 },
 	'Customer', {

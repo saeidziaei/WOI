@@ -5,3 +5,9 @@ mongod --storageEngine=mmapv1 --dbpath c:\mongo\data
 watchify -t [ babelify --presets [ react ] ] ./public/js/wo.jsx -o ./public/js/wo-bundle.js -v
 
 git push github-woi master
+
+
+
+-- for deplyoment to heroku
+   1. Set heroku parameters (use whatever is in .env file)
+   2. Just use MongoLab addon

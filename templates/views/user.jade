@@ -24,9 +24,15 @@ block content
 						label(for="phone") Phone
 						input(type='text', id="phone", name='phone', value=user.phone, placeholder='(optional)').validate
 					.input-field
-						label(for="password") Password
+						label(for="password") Password (only enter password if you want to change it)
 						input(type='text', id="password", name='password').validate
-						input(type='text', id="password_confirm", name='password_confirm').validate
+					if userType == 'operator'
+						.switch
+							label Viewer Only
+								input(type='checkbox', id='isViewerOnly', name='isViewerOnly', checked=user.isViewerOnly).validate
+								span.lever
+						br
+					.margin-top
 					if userType == 'customer'	
 						.input-field(class=validationErrors.name ? 'has-error' : null)
 							label(for="company") Company
@@ -40,5 +46,5 @@ block content
 						.input-field(class=validationErrors.shippingAddress ? 'has-error' : null)
 							label(for='shippingAddress') Shipping Address
 							textarea(name='shippingAddress', id='shippingAddress', rows=4).materialize-textarea= user.shippingAddress
-					.input-actions
+					.input-actions.margin-top
 						button(type='submit').btn Save

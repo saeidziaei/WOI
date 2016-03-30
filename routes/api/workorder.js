@@ -107,6 +107,27 @@ exports.changeStatus = function (req, res) {
 		})
 	});	
 }
+exports.addComment = function(req, res){
+	// comment is simpler than other activities, all the code in one function
+	data = req.body;
+	var activity = new WorkOrderActivity.model(
+	 { 
+		activityType: "comment",
+		comment: data.comment, 
+		workorder: data._id
+	});
+	activity._req_user = req.user;
+	
+	activity.save(function(err){
+		if (err) return res.apiError('comment insert error', err);
+		return res.apiResponse({result: "success"});
+	});
+	/*
+	WorkOrder.model.findById(data._id, function(err, w){
+		activity.workorder = w;
+		if (err) return res.apiError('database read error', err);
+	});*/
+},
 exports.updateField = function(req, res){
 	data = req.body;
 	var activity = { field: data.field, user: req.user};
@@ -152,7 +173,7 @@ exports.updateField = function(req, res){
 			
 		}
 		if (activity.activityType == 'modify' && activity.fromValue == activity.toValue) {
-			// do nothing
+			// do nothing coz from = to
 			return res.apiResponse({workorder: w});
 		}
 		w.save(function(err){
@@ -197,7 +218,11 @@ exports.list = function(req, res) {
 }
 
 exports.getActivities = function(req, res) {
-	var q = WorkOrderActivity.model.find({workorder: req.params.workorder}).populate({path: "createdBy", select: "name"}); 
+	var q = WorkOrderActivity.model.find({workorder: req.params.workorder})
+		.populate([
+			{path: "createdBy", select: "name"},
+			{path: "assignedTo", select: "name"}
+		]); 
 	q.exec(function(err, results){
 		if (err) return res.apiError('database read error', err);
 		res.apiResponse({	activities: results	});

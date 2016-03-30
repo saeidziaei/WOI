@@ -1,4 +1,3 @@
-console.log("Every big journey starts with a little step.");
 // Simulate config options from your production environment by
 // customising the .env file in your project's root folder.
 require('dotenv').load();
@@ -14,7 +13,7 @@ keystone.init({
 
 	'name': 'Kija',
 	'brand': 'Kija',
-	
+	'appversion': '0.2',
 	'less': 'public',
 	'static': 'public',
 	'favicon': 'public/favicon.ico',

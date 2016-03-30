@@ -10,40 +10,7 @@ block content
 		// hr
 			
 		.row.margin-top
-			.col.s12.m4
-				a(href='/workorder/unassigned')
-					.card.hoverable
-						.card-content
-							span.card-title Unassigned Jobs
-							h3.row
-								.col.s4
-									i.fa.fa-warning
-								.col.s4.offset-s4
-									|45
-						
-			.col.s12.m4
-				a(href='/workorder/unassigned')
-					.card.hoverable
-						.card-content
-							span.card-title In Progress
-							h3.row
-								.col.s4
-									i.fa.fa-thumbs-o-up
-								.col.s4.offset-s4
-									|23 
-
-			.col.s12.m4
-				a(href='/workorder/unassigned')
-					.card.hoverable
-						.card-content
-							span.card-title Waiting 
-							h3.row
-								.col.s4
-									i.fa.fa-refresh
-								.col.s4.offset-s4
-									|3
-
-			.col.s12.m4
+			.col.s12.m6
 				.card.hoverable
 					.card-content
 						h3.card-title Find By Job Number
@@ -58,8 +25,48 @@ block content
 							i.material-icons add
 						a.btn-floating.btn-large.waves-effect.waves-light.blue(href='/workorder') 
 							i.material-icons search
-				
+		.row.margin-top
 			.col.s12.m4
+				.card.hoverable
+					.card-content
+						span.card-title Unassigned Jobs
+						h3.row
+							.col.s4
+								i.orange-text.medium.material-icons warning
+							.col.s4.offset-s4
+								a(href='/workorders/search/unassigned') 6
+						
+			.col.s12.m4
+				.card.hoverable
+					.card-content
+						span.card-title In Progress
+						h3.row
+							.col.s4
+								i.green-text.medium.material-icons thumb_up
+							.col.s4.offset-s4
+								a(href='/workorders/search/inprogress')= data.inprogress
+
+			.col.s12.m4
+				.card.hoverable
+					.card-content
+						span.card-title Waiting For Part
+						h3.row
+							.col.s4
+								i.grey-text.medium.material-icons hourglass_empty
+							.col.s4.offset-s4
+								a(href='/workorders/search/waiting') 2			
+			.col.s12.m4
+				.card.hoverable
+					.card-content
+						span.card-title Waiting For Customer
+						h3.row
+							.col.s4
+								i.blue-text.medium.material-icons hourglass_empty
+							.col.s4.offset-s4
+								a(href='/workorders/search/waiting') 3		
+
+				
+			.col.s12.m12
 				.card-panel
 					a.btn.warm-blue.margin.waves-effect(href='operators') Manage Operators		
 		

@@ -34,9 +34,7 @@ var routes = {
 
 // Setup Route Bindings
 exports = module.exports = function(app) {
-	app.get('/', function(req, res) {
-		res.send('hello world');
-	});
+	
 	// Views
 	app.get('/', routes.views.index);
 	app.get('/blog/:category?', routes.views.blog);
@@ -63,6 +61,7 @@ exports = module.exports = function(app) {
 	
 	app.post('/api/workorder/create', keystone.middleware.api, middleware.requireStaff, routes.api.workorder.create);
 	app.post('/api/workorder/updateField', keystone.middleware.api, middleware.requireStaff, routes.api.workorder.updateField);
+	app.post('/api/workorder/addComment', keystone.middleware.api, middleware.requireStaff, routes.api.workorder.addComment);
 	app.get('/api/workorder/list', keystone.middleware.api, middleware.requireStaff, routes.api.workorder.list);
 	app.get('/api/workorder/getActivities/:workorder', keystone.middleware.api, middleware.requireStaff, routes.api.workorder.getActivities);
 	app.post('/api/workorder/changeStatus', keystone.middleware.api, middleware.requireStaff, routes.api.workorder.changeStatus);

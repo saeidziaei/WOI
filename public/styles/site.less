@@ -26,26 +26,37 @@
 @import "site/layout.less";
 
 // $fa-font-path:"../node_modules/font-awesome/fonts";
-@import "node_modules/font-awesome/less/font-awesome.less";
+// @import "node_modules/font-awesome/less/font-awesome.less";
 
 @import "materialize.min.css";
 html{
 	font-family: "Roboto", sans-serif;
 }
-.activity-modify{
-	border-left: 10px #388e3c solid;
-	margin: 10px;
-	padding: 5px; 
+.filler-child{
+	height: 100%;
+	width: 30px;
+	position: absolute;
+	left: 0;
+	top: 0;
 }
-.activity-transition{
-	border-left: 10px #e65100 solid;
-	margin: 10px;
-	padding: 5px; 
+.alert-success{
+	color: #2e7d32;
+	background-color: #c8e6c9;
 }
-.activity-assignment{
-	border-left: 10px #01579b solid;
-	margin: 10px;
-	padding: 5px; 
+.alert-danger{
+	color: #e53935;
+	background-color: #ffcdd2;
+}
+.alert-info{
+	color: #1565c0 ;
+	background-color: #bbdefb;
+}
+.alert-warning{
+	color: #ff6d00;
+	background-color: #fff3e0;
+}
+.activity-card{
+	padding-left: 50px;
 }
 .clickable{
 	cursor: pointer;

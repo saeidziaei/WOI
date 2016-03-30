@@ -34848,7 +34848,7 @@ var WO = React.createClass({
 		var service = this.renderService(workorder);
 		var actions = this.renderActions(workorder);
 		var activities = this.renderActivities(workorder);
-
+		var commentSection = this.renderCommentSection(workorder);
 		return React.createElement(
 			'div',
 			null,
@@ -34856,6 +34856,7 @@ var WO = React.createClass({
 			customer,
 			service,
 			actions,
+			commentSection,
 			activities
 		);
 	},
@@ -35272,7 +35273,55 @@ var WO = React.createClass({
 			workorder: w
 		});
 	},
+	renderCommentSection: function (w) {
+		return w._id ? React.createElement(
+			'div',
+			{ className: 'comment-section' },
+			React.createElement(
+				'h4',
+				{ className: 'header' },
+				'Add Comment'
+			),
+			React.createElement(
+				'div',
+				{ className: 'row' },
+				React.createElement(
+					'div',
+					{ className: 'input-field left col s8' },
+					React.createElement(
+						'i',
+						{ className: 'material-icons prefix' },
+						'chat_bubble_outline'
+					),
+					React.createElement('textarea', { id: 'comment', onChange: this.commentChange, className: 'materialize-textarea', value: this.state.comment })
+				),
+				React.createElement(
+					'div',
+					{ className: 'btn warm-blue', onClick: this.saveComment, title: 'Save' },
+					'OK'
+				),
+				React.createElement('div', { className: 'clearfix' })
+			)
+		) : null;
+	},
+	commentChange: function (e) {
+		this.setState({ comment: e.target.value });
+	},
+	saveComment: function () {
+		$.post('/api/workorder/addComment', {
+			_id: this.state.workorder._id,
+			comment: this.state.comment
+		}, this.serverUpdate).error(this.handleError);
+
+		this.setState({ comment: "" });
+	},
 	renderActivities: function (w) {
+		var toggleBtn = w._id ? React.createElement(
+			'div',
+			{ className: 'btn warm-blue', onClick: this.toggleActivities },
+			this.state.showActivities ? "Hide Activities" : "Show Activities"
+		) : null;
+
 		if (this.state.showActivities) {
 			var items = React.createElement(
 				'div',
@@ -35288,6 +35337,7 @@ var WO = React.createClass({
 					});
 				}
 				items = _.sortBy(activities, 'createdAt').reverse().map(function (item, i) {
+
 					var extraInfo = item.activityType == 'modify' ? React.createElement(
 						'span',
 						null,
@@ -35318,25 +35368,37 @@ var WO = React.createClass({
 							null,
 							item.transition.toStatus
 						)
+					) : item.activityType == 'assignment' && item.assignedTo ? React.createElement(
+						'span',
+						null,
+						'assigned to ',
+						React.createElement(
+							'strong',
+							null,
+							this.getName(item.assignedTo)
+						)
 					) : null;
-					var op = item.createdBy && item.createdBy.name ? item.createdBy.name.first + " " + item.createdBy.name.last : "";
+					var activityColor = item.activityType == 'comment' ? 'blue' : item.activityType == 'modify' ? 'red' : item.activityType == 'transition' ? 'yellow' : item.activityType == 'assignment' ? 'green' : "";
+					var op = item.createdBy ? this.getName(item.createdBy) : "";
 					return React.createElement(
 						'div',
-						{ className: 'activity-' + item.activityType, key: item._id },
+						{ className: 'card activity-card', key: item._id },
+						React.createElement('div', { className: 'filler-child lighten-2 ' + activityColor }),
+						' ',
+						dateFormat(item.createdAt, 'fullDate'),
+						' ',
 						React.createElement(
 							'div',
 							{ className: 'chip' },
 							op
 						),
 						'  ',
-						dateFormat(item.createdAt, 'fullDate'),
-						' | ',
 						item.comment,
-						' | ',
+						'  ',
 						extraInfo,
 						' '
 					);
-				});
+				}.bind(this));
 			}
 
 			return React.createElement(
@@ -35350,36 +35412,41 @@ var WO = React.createClass({
 				this.state.activitiesLoading ? React.createElement(Loader, null) : React.createElement(
 					'div',
 					{ className: 'row' },
+					toggleBtn,
 					React.createElement(
 						'div',
-						{ className: 'btn grey margin', onClick: this.filterActivities.bind(this, 'modify') },
-						'Show Only Field Changes'
+						{ className: 'btn blue margin', onClick: this.filterActivities.bind(this, 'comment') },
+						'Comments'
 					),
 					React.createElement(
 						'div',
-						{ className: 'btn grey margin', onClick: this.filterActivities.bind(this, 'transition') },
-						'Show Only Status Changes'
+						{ className: 'btn red margin', onClick: this.filterActivities.bind(this, 'modify') },
+						'Field Changes'
 					),
 					React.createElement(
 						'div',
-						{ className: 'btn grey margin', onClick: this.filterActivities.bind(this, 'assignment') },
-						'Show Only Assignee Changes'
+						{ className: 'btn yellow black-text margin', onClick: this.filterActivities.bind(this, 'transition') },
+						'Status Changes'
 					),
 					React.createElement(
 						'div',
-						{ className: 'btn green lighten-3 grey-text margin', onClick: this.filterActivities.bind(this, '') },
-						'Reset Filter'
+						{ className: 'btn green margin', onClick: this.filterActivities.bind(this, 'assignment') },
+						'Assignee Changes'
+					),
+					React.createElement(
+						'div',
+						{ className: 'btn warm-blue margin', onClick: this.filterActivities.bind(this, '') },
+						'Show All'
 					),
 					items
 				)
 			);
 		} else {
-			return this.state.workorder._id ? React.createElement(
-				'div',
-				{ className: 'btn warm-blue', onClick: this.toggleActivities },
-				'Show Activities'
-			) : null;
+			return toggleBtn;
 		}
+	},
+	getName: function (o) {
+		return o.name ? o.name.first + " " + o.name.last : "";
 	},
 	filterActivities: function (type) {
 		this.setState({ activitiesFilter: type });
@@ -35753,7 +35820,8 @@ var WO = React.createClass({
 			activities: null,
 			showActivities: false,
 			activitiesLoading: false,
-			activitiesFilter: null
+			activitiesFilter: null,
+			comment: ""
 		};
 	}
 });
