@@ -16,5 +16,6 @@ block js
 	script.
 		var standardItems = !{JSON.stringify(locals.standardItems)};
 		var woObject = !{JSON.stringify(locals.wo)};
+		var isViewerOnly = !{JSON.stringify(locals.user.isViewerOnly || false)};
 	script(src='/js/wo-bundle.js')
 	

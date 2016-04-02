@@ -15,5 +15,8 @@ block content
 			span#text Error text
 		
 block js
+	script.
+		var workorders = !{JSON.stringify(locals.data.workorders)};
+
 	script(src='/js/wo-bundle.js')
 	

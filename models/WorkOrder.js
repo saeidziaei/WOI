@@ -28,8 +28,22 @@ WorkOrder.schema.pre('save', function(next){
 			{keyName: 'nextJobNumber'}, 
 			{$inc: { seq: 1} }, 
 			function(error, result){
-				doc.jobNumber = result.seq;
-				next();
+				if (error) next(error);
+				if (!result){
+					var KeyService = keystone.list('KeyService');
+					var newKey = new KeyService.model({
+							keyName: 'nextJobNumber',
+							seq: 1});
+							
+					newKey.save(function(err){
+						if (err) next(err);
+						doc.jobNumber = 1;
+						next();
+					})
+				} else {
+					doc.jobNumber = result.seq;
+    				next();
+				}
 			}
 		);
 	} else {

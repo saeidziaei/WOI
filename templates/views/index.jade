@@ -34,8 +34,18 @@ block content
 							.col.s4
 								i.orange-text.medium.material-icons warning
 							.col.s4.offset-s4
-								a(href='/workorders/search/unassigned') 6
+								a(href='/wolist/category/unassigned')= data.unassigned 
 						
+			.col.s12.m4
+				.card.hoverable
+					.card-content
+						span.card-title Quote
+						h3.row
+							.col.s4
+								i.red-text.medium.material-icons visibility
+							.col.s4.offset-s4
+								a(href='/wolist/category/quote')= data.quote
+
 			.col.s12.m4
 				.card.hoverable
 					.card-content
@@ -44,7 +54,7 @@ block content
 							.col.s4
 								i.green-text.medium.material-icons thumb_up
 							.col.s4.offset-s4
-								a(href='/workorders/search/inprogress')= data.inprogress
+								a(href='/wolist/category/in_progress')= data.in_progress
 
 			.col.s12.m4
 				.card.hoverable
@@ -54,16 +64,16 @@ block content
 							.col.s4
 								i.grey-text.medium.material-icons hourglass_empty
 							.col.s4.offset-s4
-								a(href='/workorders/search/waiting') 2			
+								a(href='/wolist/category/wait_for_part')= data.wait_for_part			
 			.col.s12.m4
 				.card.hoverable
 					.card-content
 						span.card-title Waiting For Customer
 						h3.row
 							.col.s4
-								i.blue-text.medium.material-icons hourglass_empty
+								i.grey-text.medium.material-icons hourglass_empty
 							.col.s4.offset-s4
-								a(href='/workorders/search/waiting') 3		
+								a(href='/wolist/category/wait_for_customer')= data.wait_for_customer		
 
 				
 			.col.s12.m12

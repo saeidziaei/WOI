@@ -9,12 +9,12 @@ var OperatorPicker = require('./components/operatorPicker.js');
 $(document).ready(function(){
 	var woContainer = document.getElementById('wo-container');
 	if (woContainer){
-		ReactDOM.render(<WO standardItems={standardItems} data={woObject} />, woContainer);
+		ReactDOM.render(<WO standardItems={standardItems} data={woObject} isViewerOnly={isViewerOnly} />, woContainer);
 	}
 
 	var woLookupContainer = document.getElementById('wo-lookup-container');
 	if (woLookupContainer){
-		ReactDOM.render(<WoLookup  />, woLookupContainer);
+		ReactDOM.render(<WoLookup data={workorders}  />, woLookupContainer);
 	}
 	
 	var operatorsContainer = document.getElementById('operators-container');

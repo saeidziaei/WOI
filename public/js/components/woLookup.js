@@ -36,8 +36,9 @@ var WoLookup = React.createClass({
   },
   
   getInitialState: function(){
+	  console.log(this.props.data);
 	  return {
-		  searchResult: null,
+		  searchResult: this.props.data,
 		  search_token: ''
 	  };
   }

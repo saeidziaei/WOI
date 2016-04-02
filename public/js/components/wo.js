@@ -63,7 +63,7 @@ var WO = React.createClass({
         	  <input disabled id="price" type="text" className=" price" value={w.price ? numeral(w.price).format('0,0.00') : w.price}/>
 	       </div>
 
-			   <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'PRICE')}>Change</div>
+			   {this.props.isViewerOnly ? null : <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'PRICE')}>Change</div>}
 			   <div className='clearfix'/>
 		 </div>)
 		;
@@ -109,7 +109,7 @@ var WO = React.createClass({
 			: (<div>
 				<h5>Description</h5>
 				<div className='grey-text  service-description left'>{w.description}</div>
-				<div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>
+				{this.props.isViewerOnly ? null : <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>}
 				<div className='clearfix'/>
 			</div>)
 				;
@@ -169,7 +169,8 @@ var WO = React.createClass({
 				<ul className='collection with-header'>
 					<li className="collection-header"><h5>Service Items</h5></li>
 					{items}
-					<li className='collection-item'><div className='btn-flat blue-text small' onClick={this.makeEditable.bind(this, 'ITEMS')}>Change</div></li>
+					{this.props.isViewerOnly ? null :
+						 <li className='collection-item'><div className='btn-flat blue-text small' onClick={this.makeEditable.bind(this, 'ITEMS')}>Change</div></li>}
 				</ul>
 
 			</div>
@@ -434,9 +435,15 @@ var WO = React.createClass({
 				function(){
 					w.customer = dbCustomer._id;
 					self.saveWorkOrder(w, function(result){
-						swal("Job Number " + result.workorder.jobNumber, "New workorder saved.", "success");
+						var jn = result.workorder.jobNumber;
+						swal({
+								title:"Job Number " + jn, 
+								text: "New workorder saved.", 
+								type:"success"
+							}, function () {
+								window.location.replace("/wo/jn/" + jn);
+							});
 						console.log("/workorder/save", result);
-						self.setState({workorder: result.workorder});
 					});
 				}
 			]);
@@ -565,7 +572,7 @@ var WO = React.createClass({
 										 <span>Assigned to </span>
 										 <Operator data={w.assignee}  />
 										 <br/>
-										 <div className='btn-flat blue-text small' onClick={this.assignTo}>Change</div>
+										 {this.props.isViewerOnly ? null : <div className='btn-flat blue-text small' onClick={this.assignTo}>Change</div>}
 									</div> :
 									w.status != woStatus.DRAFT ?
 									<div className='btn' onClick={this.assignTo}>Assign To ...</div>

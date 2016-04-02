@@ -42,6 +42,7 @@ exports = module.exports = function(app) {
 	app.get('/gallery', routes.views.gallery);
 	app.all('/contact', routes.views.contact);
 	app.all('/wolist', middleware.requireStaff, routes.views.wolist);
+	app.all('/wolist/category/:category', middleware.requireStaff, routes.views.wolist);
 	app.all('/customer/:customer?', middleware.requireStaff, routes.views.customer, routes.views.user);
 	app.all('/operator/:operator?', middleware.requireManager, routes.views.operator, routes.views.user);
 	app.get('/operators', middleware.requireManager, routes.views.operators);

@@ -34934,7 +34934,7 @@ var WO = React.createClass({
 				),
 				React.createElement('input', { disabled: true, id: 'price', type: 'text', className: ' price', value: w.price ? numeral(w.price).format('0,0.00') : w.price })
 			),
-			React.createElement(
+			this.props.isViewerOnly ? null : React.createElement(
 				'div',
 				{ className: 'btn-flat blue-text small margin-top', onClick: this.makeEditable.bind(this, 'PRICE') },
 				'Change'
@@ -35027,7 +35027,7 @@ var WO = React.createClass({
 				{ className: 'grey-text  service-description left' },
 				w.description
 			),
-			React.createElement(
+			this.props.isViewerOnly ? null : React.createElement(
 				'div',
 				{ className: 'btn-flat blue-text small margin-top', onClick: this.makeEditable.bind(this, 'DESCRIPTION') },
 				'Change'
@@ -35153,7 +35153,7 @@ var WO = React.createClass({
 						)
 					),
 					items,
-					React.createElement(
+					this.props.isViewerOnly ? null : React.createElement(
 						'li',
 						{ className: 'collection-item' },
 						React.createElement(
@@ -35516,9 +35516,15 @@ var WO = React.createClass({
 			}, function () {
 				w.customer = dbCustomer._id;
 				self.saveWorkOrder(w, function (result) {
-					swal("Job Number " + result.workorder.jobNumber, "New workorder saved.", "success");
+					var jn = result.workorder.jobNumber;
+					swal({
+						title: "Job Number " + jn,
+						text: "New workorder saved.",
+						type: "success"
+					}, function () {
+						window.location.replace("/wo/jn/" + jn);
+					});
 					console.log("/workorder/save", result);
-					self.setState({ workorder: result.workorder });
 				});
 			}]);
 		} catch (e) {
@@ -35678,7 +35684,7 @@ var WO = React.createClass({
 			),
 			React.createElement(Operator, { data: w.assignee }),
 			React.createElement('br', null),
-			React.createElement(
+			this.props.isViewerOnly ? null : React.createElement(
 				'div',
 				{ className: 'btn-flat blue-text small', onClick: this.assignTo },
 				'Change'
@@ -35988,8 +35994,9 @@ var WoLookup = React.createClass({
 	},
 
 	getInitialState: function () {
+		console.log(this.props.data);
 		return {
-			searchResult: null,
+			searchResult: this.props.data,
 			search_token: ''
 		};
 	}
@@ -36029,12 +36036,12 @@ var OperatorPicker = require('./components/operatorPicker.js');
 $(document).ready(function () {
 	var woContainer = document.getElementById('wo-container');
 	if (woContainer) {
-		ReactDOM.render(React.createElement(WO, { standardItems: standardItems, data: woObject }), woContainer);
+		ReactDOM.render(React.createElement(WO, { standardItems: standardItems, data: woObject, isViewerOnly: isViewerOnly }), woContainer);
 	}
 
 	var woLookupContainer = document.getElementById('wo-lookup-container');
 	if (woLookupContainer) {
-		ReactDOM.render(React.createElement(WoLookup, null), woLookupContainer);
+		ReactDOM.render(React.createElement(WoLookup, { data: workorders }), woLookupContainer);
 	}
 
 	var operatorsContainer = document.getElementById('operators-container');
