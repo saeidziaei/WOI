@@ -38,7 +38,7 @@ exports = module.exports = function(req, res) {
 				.exec(function(err, result){
 					// async callback
 					if (result && result.length){
-						locals.data.unassigned = result[0].total;
+						locals.data.unassigned = result[0].total || 0;
 					}
 					callback(err);
 				});

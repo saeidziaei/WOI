@@ -1,5 +1,5 @@
 var React = require('react');
-var WoList = require('./woList.js');
+var WoList = require('./wolist.js');
 
 
 var WoLookup = React.createClass({

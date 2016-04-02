@@ -35834,7 +35834,7 @@ var WO = React.createClass({
 
 module.exports = WO;
 
-},{"./customerBox":176,"./customerLookup":178,"./operator":179,"./operatorPicker":180,"./woStatus":185,"async":2,"dateformat":3,"jquery":4,"numeral":5,"react":164,"react-loader":7,"sweetalert":173,"underscore":174}],182:[function(require,module,exports){
+},{"./customerBox":176,"./customerLookup":178,"./operator":179,"./operatorPicker":180,"./woStatus":184,"async":2,"dateformat":3,"jquery":4,"numeral":5,"react":164,"react-loader":7,"sweetalert":173,"underscore":174}],182:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = require('./customerBox');
 var CommentBox = require('./commentBox');
@@ -35919,33 +35919,7 @@ module.exports = WoCompact;
 
 },{"./commentBox":175,"./customerBox":176,"./operator":179,"react":164,"underscore":174}],183:[function(require,module,exports){
 var React = require('react');
-var WoCompact = require('./woCompact');
-
-var WoList = React.createClass({
-	displayName: 'WoList',
-
-	render: function () {
-		var list = this.props.data ? this.props.data.map(function (item) {
-			return React.createElement(WoCompact, { key: item._id, data: item, onSelect: this.itemSelect });
-		}.bind(this)) : null;
-		return React.createElement(
-			'div',
-			{ className: 'workorder-box-list row margin-top' },
-			list
-		);
-	},
-	itemSelect: function (wo) {
-		if (this.props.onSelect) {
-			this.props.onSelect(wo);
-		}
-	}
-});
-
-module.exports = WoList;
-
-},{"./woCompact":182,"react":164}],184:[function(require,module,exports){
-var React = require('react');
-var WoList = require('./woList.js');
+var WoList = require('./wolist.js');
 
 var WoLookup = React.createClass({
 	displayName: 'WoLookup',
@@ -36005,7 +35979,7 @@ var WoLookup = React.createClass({
 
 module.exports = WoLookup;
 
-},{"./woList.js":183,"react":164}],185:[function(require,module,exports){
+},{"./wolist.js":185,"react":164}],184:[function(require,module,exports){
 const DRAFT = 'DRAFT';
 const IN_PROGRESS = 'IN PROGRESS';
 const QUOTE = 'QUOTE';
@@ -36024,7 +35998,33 @@ module.exports = {
     REJECTED: REJECTED
 };
 
-},{}],186:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
+var React = require('react');
+var WoCompact = require('./woCompact');
+
+var WoList = React.createClass({
+	displayName: 'WoList',
+
+	render: function () {
+		var list = this.props.data ? this.props.data.map(function (item) {
+			return React.createElement(WoCompact, { key: item._id, data: item, onSelect: this.itemSelect });
+		}.bind(this)) : null;
+		return React.createElement(
+			'div',
+			{ className: 'workorder-box-list row margin-top' },
+			list
+		);
+	},
+	itemSelect: function (wo) {
+		if (this.props.onSelect) {
+			this.props.onSelect(wo);
+		}
+	}
+});
+
+module.exports = WoList;
+
+},{"./woCompact":182,"react":164}],186:[function(require,module,exports){
 var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -36052,4 +36052,4 @@ $(document).ready(function () {
 	}
 });
 
-},{"./components/operatorPicker.js":180,"./components/wo.js":181,"./components/woLookup.js":184,"jquery":4,"react":164,"react-dom":6}]},{},[186]);
+},{"./components/operatorPicker.js":180,"./components/wo.js":181,"./components/woLookup.js":183,"jquery":4,"react":164,"react-dom":6}]},{},[186]);

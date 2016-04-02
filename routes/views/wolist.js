@@ -63,7 +63,7 @@ exports = module.exports = function(req, res) {
 	
 	
 	// Render the view
-	view.render('woList');
+	view.render('wolist');
 	
 };
 
