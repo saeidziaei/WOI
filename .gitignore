@@ -22,10 +22,13 @@ build/Release
 # Dependency directory
 # Deployed apps should consider commenting this line out:
 # see https://npmjs.org/doc/faq.html#Should-I-check-my-node_modules-folder-into-git
-node_modules/*
-
 # except changes to keystone pages (sign in etc.)
-!node_modules/keystone/templates/*
+
+node_modules/*
+!node_modules/keystone
+node_modules/keystone/*
+!node_modules/keystone/templates
+
 
 # Ignore .env configuration files
 .env
