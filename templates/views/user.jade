@@ -23,8 +23,10 @@ block content
 					.input-field
 						label(for="phone") Phone
 						input(type='text', id="phone", name='phone', value=user.phone, placeholder='(optional)').validate
+					
+					p.grey-text: em only enter password if you want to change it
 					.input-field
-						label(for="password") Password (only enter password if you want to change it)
+						label(for="password") Password
 						input(type='text', id="password", name='password').validate
 					if userType == 'operator'
 						.switch

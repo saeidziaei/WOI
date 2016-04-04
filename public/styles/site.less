@@ -28,7 +28,7 @@
 // $fa-font-path:"../node_modules/font-awesome/fonts";
 // @import "node_modules/font-awesome/less/font-awesome.less";
 
-@import "materialize.min.css";
+@import (less) "materialize.min.css";
 html{
 	font-family: "Roboto", sans-serif;
 }
@@ -39,6 +39,19 @@ html{
 	left: 0;
 	top: 0;
 }
+.status-inprogress{
+	.white-text();
+	.green();
+}
+.status-rejected{
+	.white-text();
+	.red();
+}
+.status-completed{
+	.white-text();
+	.blue();
+}
+
 .alert-success{
 	color: #2e7d32;
 	background-color: #c8e6c9;
@@ -62,7 +75,7 @@ html{
 	cursor: pointer;
 }
 .price{
-	font-size: 24pt !important;	
+	font-size: 16pt !important;	
 	font-weight: 300;
 	width: 80%;
 }
@@ -74,15 +87,20 @@ h2, h3{
 	font-size: .8em;
 }
 .service-description{
-	font-size: 30pt !important;	
+	font-size: 16pt !important;	
 	font-weight: 300;
 }
 .big-font{
-	font-size: 30pt !important;	
+	font-size: 22pt !important;	
 	font-weight: 300;
 	color: red(#777);
-}.header{
+}
+.header{
 	color: #777;
+	font-weight: 300;
+}
+.sub-header{
+	color: #888;
 	font-weight: 300;
 }
 .section-actions .btn{

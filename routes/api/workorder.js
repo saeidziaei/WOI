@@ -50,7 +50,8 @@ function createTransitionActivity(activity){
 			fromStatus: activity.fromStatus,
 			toStatus: activity.toStatus
 		},	
-		comment: "Changed Status"
+		comment: "Changed Status",
+		note: activity.note
 	});
 }
 function createAssignmentActivity(activity){
@@ -94,6 +95,7 @@ exports.changeStatus = function (req, res) {
 		// TODO: Check for valid status transitions
 		activity.fromStatus = w.status;
 		activity.toStatus = data.status;
+		activity.note = data.note;
 		activity.workorder = w;
 
 		w.status = data.status;

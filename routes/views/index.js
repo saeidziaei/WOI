@@ -37,9 +37,8 @@ exports = module.exports = function(req, res) {
 					{$group:{_id: null, total:{$sum: 1}}})
 				.exec(function(err, result){
 					// async callback
-					if (result && result.length){
-						locals.data.unassigned = result[0].total || 0;
-					}
+					locals.data.unassigned = (result && result.length) ? result[0].total : 0;
+					
 					callback(err);
 				});
         		 

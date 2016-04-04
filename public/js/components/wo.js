@@ -58,9 +58,7 @@ var WO = React.createClass({
 		:
 		(<div >
 			<div className="input-field left">
-    	      <i className="material-icons prefix">attach_moneyu</i>
-          	  <label htmlFor="price" className="active">Price</label>
-        	  <input disabled id="price" type="text" className=" price" value={w.price ? numeral(w.price).format('0,0.00') : w.price}/>
+    	      <span>Price:</span> <span>{w.price ? '$ ' + numeral(w.price).format('0,0.00') : w.price}</span>
 	       </div>
 
 			   {this.props.isViewerOnly ? null : <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'PRICE')}>Change</div>}
@@ -107,8 +105,8 @@ var WO = React.createClass({
 			
 			
 			: (<div>
-				<h5>Description</h5>
-				<div className='grey-text  service-description left'>{w.description}</div>
+				
+				<div className='  service-description left'>{w.description}</div>
 				{this.props.isViewerOnly ? null : <div className='btn-flat blue-text small margin-top' onClick={this.makeEditable.bind(this, 'DESCRIPTION')}>Change</div>}
 				<div className='clearfix'/>
 			</div>)
@@ -167,7 +165,7 @@ var WO = React.createClass({
 
 			serviceItems = <div>
 				<ul className='collection with-header'>
-					<li className="collection-header"><h5>Service Items</h5></li>
+					<li className="collection-header"><div className='sub-header'>Service Items</div></li>
 					{items}
 					{this.props.isViewerOnly ? null :
 						 <li className='collection-item'><div className='btn-flat blue-text small' onClick={this.makeEditable.bind(this, 'ITEMS')}>Change</div></li>}
@@ -178,7 +176,7 @@ var WO = React.createClass({
 
 
 		return (<div className='service-section'>
-				<h4 className='header'>Service</h4>
+				<div className='header'>Service Description</div>
 				{description}
 				{serviceItems}
 			</div>)
@@ -281,7 +279,7 @@ var WO = React.createClass({
 	}, 
 	renderCommentSection: function(w){
 		return w._id ? <div className='comment-section'>
-				<h4 className='header'>Add Comment</h4>
+				<div className='header'>Add Comment</div>
 				<div className='row'>
 					<div className='input-field left col s8'>
 						<i className='material-icons prefix'>chat_bubble_outline</i>
@@ -309,7 +307,7 @@ var WO = React.createClass({
 	},
 	renderActivities: function(w){
 		var toggleBtn = w._id ? 
-			<div className='btn warm-blue' onClick={this.toggleActivities}>{this.state.showActivities ? "Hide Activities" :  "Show Activities"}</div> :
+			<a className='clickable ' onClick={this.toggleActivities}>{this.state.showActivities ? "Hide Activities" :  "Show Activities"}</a> :
 			null;
 			
 		if (this.state.showActivities){
@@ -326,7 +324,7 @@ var WO = React.createClass({
 					.map(function(item, i){
 						
 						var extraInfo = item.activityType == 'modify' ? (<span>from <strong>{item.modify.fromValue}</strong> to <strong>{item.modify.toValue}</strong></span>) :
-										item.activityType == 'transition' && item.transition ? (<span>from <strong>{item.transition.fromStatus}</strong> to <strong>{item.transition.toStatus}</strong></span>) : 
+										item.activityType == 'transition' && item.transition ? (<span>from <strong>{item.transition.fromStatus}</strong> to <strong>{item.transition.toStatus}</strong> {item.note}</span>) : 
 										item.activityType == 'assignment' && item.assignedTo ? (<span>assigned to <strong>{this.getName(item.assignedTo)}</strong></span>) : 
 										null;
 						var activityColor = item.activityType == 'comment' ? 'blue' :
@@ -341,7 +339,7 @@ var WO = React.createClass({
 			}
 			  
 			return (<div className='activities-section'>
-				<h4 className='header'>Activities</h4>
+				<div className='header'>Activities</div>
 				{this.state.activitiesLoading ?
 					<Loader />
 				:
@@ -351,7 +349,7 @@ var WO = React.createClass({
 					<div className='btn red margin' onClick={this.filterActivities.bind(this, 'modify')}>Field Changes</div>
 					<div className='btn yellow black-text margin' onClick={this.filterActivities.bind(this, 'transition')}>Status Changes</div>
 					<div className='btn green margin' onClick={this.filterActivities.bind(this, 'assignment')}>Assignee Changes</div>
-					<div className='btn warm-blue margin' onClick={this.filterActivities.bind(this, '')}>Show All</div>
+					<a className='clickable margin' onClick={this.filterActivities.bind(this, '')}>Show All</a>
 					{items}
 				</div>
 				}
@@ -479,40 +477,32 @@ var WO = React.createClass({
 		actionNote: e.target.value
 		});
 	},
-	showActionDetails: function(actionType){
-		this.setState({
-			showActionDetail: true,
-			actionType: actionType
-		});
-	},
-	submitAction: function(){
-		var note = this.state.actionNote;
-		switch (this.state.actionType)
-		{
-			case 'WAIT FOR PART':
-				$.post('/workorder/waitForPart', {note: note}, serverUpdate);
-				break;
-
-			case 'WAIT FOR CUSTOMER':
-				$.post('/workorder/waitForCustomer', {note: note}, serverUpdate);
-				break;
-
-			case 'REOPEN':
-				$.post('/workorder/reopen', {note: note}, serverUpdate);
-				break;
-		}
-
-		this.setState({
-			showActionDetail: false,
-			actionType: null,
-			actionNote: null
-		});
+	showActionDetails: function(newStatus){
+		swal({   
+			title: newStatus,   
+			text: "Add more details:",   
+			type: "input",   
+			showCancelButton: true,   
+			closeOnConfirm: false,   
+			animation: "slide-from-top",   
+			inputPlaceholder: "Notes" }, 
+			function(inputValue){   
+				if (inputValue === false) return false;      
+				if (inputValue === "") {     swal.showInputError("You need to write something!");     return false   }      
+				this.changeStatusWithNotes(newStatus, inputValue); 
+			}.bind(this)
+		);
+		
 	},
 	changeStatus: function(newStatus){
+		this.changeStatusWithNotes(newStatus, null);	
+	},
+	changeStatusWithNotes: function(newStatus, note){
 		$.post('/api/workorder/changeStatus', 
 			{
 				_id : this.state.workorder._id,
-				status: newStatus
+				status: newStatus,
+				note: note
 			}, 
 			function(result) {
 				var w = this.state.workorder;
@@ -559,12 +549,10 @@ var WO = React.createClass({
 	renderActions: function(w){
 		var btnDevStartOver  = <div className='btn orange lighten-1' onClick={this.changeStatus.bind(this, woStatus.QUOTE)}>Start Over From Quote</div>;
 		
+		
 		var btnCreate = !w.jobNumber ? <div className='btn' onClick={this.create}>Create</div> : null;
 		var btnStart  = w.status == woStatus.QUOTE || w.status == woStatus.WAIT_FOR_PART || w.status == woStatus.WAIT_FOR_CUSTOMER ?
-				<div>
-					<div className='btn' onClick={this.changeStatus.bind(this, woStatus.IN_PROGRESS)}>Start Progress</div>
-					<em>* Customer has accepted the quote</em>
-				</div> : null;
+					<div className='btn' onClick={this.changeStatus.bind(this, woStatus.IN_PROGRESS)}>Start Progress</div> : null;
 		var btnReject  = w.status == woStatus.QUOTE ?  <div className='btn red lighten-1' onClick={this.changeStatus.bind(this, woStatus.REJECTED)}>Reject</div> : null;
 		var btnWaitForPart = w.status == woStatus.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text' onClick={this.showActionDetails.bind(this, 'WAIT FOR PART')}>Wait For Part</div> : null;
 		var btnWaitForCustomer = w.status == woStatus.IN_PROGRESS ? <div className='btn grey lighten-3 blue-text'  onClick={this.showActionDetails.bind(this, 'WAIT FOR CUSTOMER')}>Wait For Customer</div> : null;
@@ -608,12 +596,11 @@ var WO = React.createClass({
 	},
 	renderJobHeader: function(w){
 		var priceInfo = this.renderPriceInfo(w);
-		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' :
-						 w.status == woStatus.REJECTED ? 'red white-text' : 
-						 w.status == woStatus.COMPLETED ? 'blue white-text' : '';
+		var statusClass = 'status-' + w.status.toLowerCase().replace(/ /g,''); //remove all spaces 
+
 		return <div className='row '>
 			<div className='col s12 m3 big-font'>
-				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={statusClass + ' chip'}>{w.status}</div>
+				{w.jobNumber ? 'Job# ' + w.jobNumber : 'New'} <div className={'chip ' + statusClass}>{w.status}</div>
 			</div>
 
 			<div className='col s12 m3 margin-top grey lighten-5'>
@@ -638,7 +625,7 @@ var WO = React.createClass({
 		var lookup = <CustomerLookup key={key} selectedCustomer={c} onChange={this.customerLookupChange} onNewCustomer={this.newCustomerChange}/>;
 
 		return (<div className='customer-section'>
-			<h4 className='header'>Customer</h4>
+			<div className='header'>Customer</div>
 			{lookup}
 		</div>);
 	},

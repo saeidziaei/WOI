@@ -32,6 +32,9 @@ WorkOrderActivity.add({
 	},
 	// only when type = assignment
 	assignedTo: { type: Types.Relationship, required: false, ref: 'User', initial: false },
+	// normally used for wait-for-part, wait-for-customer or re-open to provide more details
+	note: { type: String, required: false, initial: false },
+	
 		
 });
 

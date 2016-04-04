@@ -16,14 +16,14 @@ block content
 						h3.card-title Find By Job Number
 						.row
 							.input-field.col.s8
-								input#lookup-name(type='text')
+								input#lookup-jn(type='text')
 							.valign-wrapper.col.s4
 								.margin-top 
-									a.valign.btn.waves-effect.margin-top.green Go
+									a.valign.btn.waves-effect.margin-top.green#gotojn Go
 					.card-action
-						a.btn-floating.btn-large.waves-effect.waves-light.green.margin-right(href='/quote') 
+						a.btn-floating.btn-large.waves-effect.waves-light.green.margin-right(href='/wo/jn') 
 							i.material-icons add
-						a.btn-floating.btn-large.waves-effect.waves-light.blue(href='/workorder') 
+						a.btn-floating.btn-large.waves-effect.waves-light.blue(href='/wolist') 
 							i.material-icons search
 		.row.margin-top
 			.col.s12.m4
@@ -79,36 +79,10 @@ block content
 			.col.s12.m12
 				.card-panel
 					a.btn.warm-blue.margin.waves-effect(href='operators') Manage Operators		
-		
-		
-	//		
-		.tiles-container
-		.row
-			.col-xs-12.col-sm-4
-				a(href='#', title='Navigate to View Payment History')
-				.next-payment.tile
-					.text-right
-					span.payment-amount= '$' 
-					br
-					.tile-name.bottom-left
-					| Next payment
-				.tile.another-tile
-					h3 Another Tile
-				.tile.last-payment
-					h3 Number 3
-			.col-xs-12.col-sm-4
-				.tile.tile-full-height
-					h3 Full Height
-			.col-xs-12.col-sm-4.tiles-group
-				.row
-				.col.s6.m4
-					+minitile('950', ("tile.create-ad"), 'Navigate somewhere!', 'fa-bolt', 'orange')
-				.col.s6.m4
-					+minitile('951', ("tile.buy-bitcoin"), 'Click to go to request doco', 'fa-bitcoin', 'green')
-				.row
-				.col.s6.m4
-					+minitile('952', ("tile.contact-us"), 'Navigate somewhere!', 'fa-paper-plane-o', 'purple')
-				.col.s6.m4
-					+minitile('953', ("tile.sell-bitcoin"), 'Click to go to request doco', 'fa-bitcoin', 'orange')
-					
-		
+block js
+	script.
+		$(document).ready(function(){
+			$("#gotojn").on("click", function(){
+				window.location.href = '/wo/jn/' + $("#lookup-jn").val();
+			});
+		});

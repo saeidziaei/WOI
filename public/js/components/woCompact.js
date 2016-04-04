@@ -13,13 +13,14 @@ var WoCompact = React.createClass({
 		var list = wo.items.map(function(item, i){
 			return <li className='collection-item' key={i}>{item}</li>
 		}.bind(this));
-		
+		var statusClass = 'status-' + wo.status.toLowerCase().replace(/ /g,''); //remove all spaces 
+
 		return (
 		<div className="wo-comapct">
         <div className="col s12 m6">
           <div className="card ">
             <div className="card-content">
-              <span className="card-title">JOB# {wo.jobNumber} <span className='chip right'>{wo.status}</span></span>
+              <span className="card-title">JOB# {wo.jobNumber} <span className={'chip right ' + statusClass}>{wo.status}</span></span>
               <p className='truncate'>{wo.description}</p>
 			  <ul className='collection'>
 			  {list}

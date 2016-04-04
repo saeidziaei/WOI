@@ -34923,16 +34923,16 @@ var WO = React.createClass({
 				'div',
 				{ className: 'input-field left' },
 				React.createElement(
-					'i',
-					{ className: 'material-icons prefix' },
-					'attach_moneyu'
+					'span',
+					null,
+					'Price:'
 				),
+				' ',
 				React.createElement(
-					'label',
-					{ htmlFor: 'price', className: 'active' },
-					'Price'
-				),
-				React.createElement('input', { disabled: true, id: 'price', type: 'text', className: ' price', value: w.price ? numeral(w.price).format('0,0.00') : w.price })
+					'span',
+					null,
+					w.price ? '$ ' + numeral(w.price).format('0,0.00') : w.price
+				)
 			),
 			this.props.isViewerOnly ? null : React.createElement(
 				'div',
@@ -35018,13 +35018,8 @@ var WO = React.createClass({
 			'div',
 			null,
 			React.createElement(
-				'h5',
-				null,
-				'Description'
-			),
-			React.createElement(
 				'div',
-				{ className: 'grey-text  service-description left' },
+				{ className: '  service-description left' },
 				w.description
 			),
 			this.props.isViewerOnly ? null : React.createElement(
@@ -35147,8 +35142,8 @@ var WO = React.createClass({
 						'li',
 						{ className: 'collection-header' },
 						React.createElement(
-							'h5',
-							null,
+							'div',
+							{ className: 'sub-header' },
 							'Service Items'
 						)
 					),
@@ -35170,9 +35165,9 @@ var WO = React.createClass({
 			'div',
 			{ className: 'service-section' },
 			React.createElement(
-				'h4',
+				'div',
 				{ className: 'header' },
-				'Service'
+				'Service Description'
 			),
 			description,
 			serviceItems
@@ -35278,7 +35273,7 @@ var WO = React.createClass({
 			'div',
 			{ className: 'comment-section' },
 			React.createElement(
-				'h4',
+				'div',
 				{ className: 'header' },
 				'Add Comment'
 			),
@@ -35317,8 +35312,8 @@ var WO = React.createClass({
 	},
 	renderActivities: function (w) {
 		var toggleBtn = w._id ? React.createElement(
-			'div',
-			{ className: 'btn warm-blue', onClick: this.toggleActivities },
+			'a',
+			{ className: 'clickable ', onClick: this.toggleActivities },
 			this.state.showActivities ? "Hide Activities" : "Show Activities"
 		) : null;
 
@@ -35367,7 +35362,9 @@ var WO = React.createClass({
 							'strong',
 							null,
 							item.transition.toStatus
-						)
+						),
+						' ',
+						item.note
 					) : item.activityType == 'assignment' && item.assignedTo ? React.createElement(
 						'span',
 						null,
@@ -35405,7 +35402,7 @@ var WO = React.createClass({
 				'div',
 				{ className: 'activities-section' },
 				React.createElement(
-					'h4',
+					'div',
 					{ className: 'header' },
 					'Activities'
 				),
@@ -35434,8 +35431,8 @@ var WO = React.createClass({
 						'Assignee Changes'
 					),
 					React.createElement(
-						'div',
-						{ className: 'btn warm-blue margin', onClick: this.filterActivities.bind(this, '') },
+						'a',
+						{ className: 'clickable margin', onClick: this.filterActivities.bind(this, '') },
 						'Show All'
 					),
 					items
@@ -35558,38 +35555,30 @@ var WO = React.createClass({
 			actionNote: e.target.value
 		});
 	},
-	showActionDetails: function (actionType) {
-		this.setState({
-			showActionDetail: true,
-			actionType: actionType
-		});
-	},
-	submitAction: function () {
-		var note = this.state.actionNote;
-		switch (this.state.actionType) {
-			case 'WAIT FOR PART':
-				$.post('/workorder/waitForPart', { note: note }, serverUpdate);
-				break;
-
-			case 'WAIT FOR CUSTOMER':
-				$.post('/workorder/waitForCustomer', { note: note }, serverUpdate);
-				break;
-
-			case 'REOPEN':
-				$.post('/workorder/reopen', { note: note }, serverUpdate);
-				break;
-		}
-
-		this.setState({
-			showActionDetail: false,
-			actionType: null,
-			actionNote: null
-		});
+	showActionDetails: function (newStatus) {
+		swal({
+			title: newStatus,
+			text: "Add more details:",
+			type: "input",
+			showCancelButton: true,
+			closeOnConfirm: false,
+			animation: "slide-from-top",
+			inputPlaceholder: "Notes" }, function (inputValue) {
+			if (inputValue === false) return false;
+			if (inputValue === "") {
+				swal.showInputError("You need to write something!");return false;
+			}
+			this.changeStatusWithNotes(newStatus, inputValue);
+		}.bind(this));
 	},
 	changeStatus: function (newStatus) {
+		this.changeStatusWithNotes(newStatus, null);
+	},
+	changeStatusWithNotes: function (newStatus, note) {
 		$.post('/api/workorder/changeStatus', {
 			_id: this.state.workorder._id,
-			status: newStatus
+			status: newStatus,
+			note: note
 		}, function (result) {
 			var w = this.state.workorder;
 			w.status = newStatus;
@@ -35647,17 +35636,8 @@ var WO = React.createClass({
 		) : null;
 		var btnStart = w.status == woStatus.QUOTE || w.status == woStatus.WAIT_FOR_PART || w.status == woStatus.WAIT_FOR_CUSTOMER ? React.createElement(
 			'div',
-			null,
-			React.createElement(
-				'div',
-				{ className: 'btn', onClick: this.changeStatus.bind(this, woStatus.IN_PROGRESS) },
-				'Start Progress'
-			),
-			React.createElement(
-				'em',
-				null,
-				'* Customer has accepted the quote'
-			)
+			{ className: 'btn', onClick: this.changeStatus.bind(this, woStatus.IN_PROGRESS) },
+			'Start Progress'
 		) : null;
 		var btnReject = w.status == woStatus.QUOTE ? React.createElement(
 			'div',
@@ -35748,7 +35728,8 @@ var WO = React.createClass({
 	},
 	renderJobHeader: function (w) {
 		var priceInfo = this.renderPriceInfo(w);
-		var statusClass = w.status == woStatus.IN_PROGRESS ? 'green white-text' : w.status == woStatus.REJECTED ? 'red white-text' : w.status == woStatus.COMPLETED ? 'blue white-text' : '';
+		var statusClass = 'status-' + w.status.toLowerCase().replace(/ /g, ''); //remove all spaces
+
 		return React.createElement(
 			'div',
 			{ className: 'row ' },
@@ -35759,7 +35740,7 @@ var WO = React.createClass({
 				' ',
 				React.createElement(
 					'div',
-					{ className: statusClass + ' chip' },
+					{ className: 'chip ' + statusClass },
 					w.status
 				)
 			),
@@ -35795,7 +35776,7 @@ var WO = React.createClass({
 			'div',
 			{ className: 'customer-section' },
 			React.createElement(
-				'h4',
+				'div',
 				{ className: 'header' },
 				'Customer'
 			),
@@ -35856,6 +35837,7 @@ var WoCompact = React.createClass({
 				item
 			);
 		}.bind(this));
+		var statusClass = 'status-' + wo.status.toLowerCase().replace(/ /g, ''); //remove all spaces
 
 		return React.createElement(
 			'div',
@@ -35877,7 +35859,7 @@ var WoCompact = React.createClass({
 							' ',
 							React.createElement(
 								'span',
-								{ className: 'chip right' },
+								{ className: 'chip right ' + statusClass },
 								wo.status
 							)
 						),

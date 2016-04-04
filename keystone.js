@@ -30,7 +30,7 @@ keystone.init({
 		if (user.isManager)
 			res.redirect('/');
 		else if (user.isOperator)
-			res.redirect('/jn');
+			res.redirect('/wolist/category/my_jobs');
 		else if (user.isCustomer)
 			res.redirect('/tracking');
 		else if (user.isAdmin)
