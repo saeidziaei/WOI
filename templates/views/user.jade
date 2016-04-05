@@ -7,46 +7,47 @@ block intro
 block content
 	.container
 		
-		if submitted
-			h3 record saved!
-		else
-			row: .col-sm-8.col-md-6
-				form(method='post')
-					input(type='hidden', name='_id', value=user._id)
-					input(type='hidden', name='action', value=userType)
+		// if submitted
+		// 	h3 record saved!
+		// else
+		row: .col-sm-8.col-md-6
+			form(method='post')
+				input(type='hidden', name='_id', value=item._id)
+				input(type='hidden', name='action', value=userType)
+				.input-field(class=validationErrors.name ? 'has-error' : null)
+					label(for="fullName") Name
+					input(type='text', id="fullName" name='name.full', value=item.name ? item.name.full : '').validate
+				.input-field(class=validationErrors.email ? 'has-error' : null)
+					label(for="email") Email
+					input(type='email', id="email", name='email', value=item.email).validate
+				.input-field
+					label(for="phone") Phone
+					input(type='text', id="phone", name='phone', value=item.phone, placeholder='(optional)').validate
+				
+				p.grey-text: em only enter password if you want to change it
+				.input-field
+					label(for="password") Password
+					input(type='text', id="password", name='password').validate
+				if userType == 'operator'
+					.switch
+						label Viewer Only
+							input(type='checkbox', id='isViewerOnly', name='isViewerOnly', checked=item.isViewerOnly).validate
+							span.lever
+					br
+				.margin-top
+				if userType == 'customer'	
 					.input-field(class=validationErrors.name ? 'has-error' : null)
-						label(for="fullName") Name
-						input(type='text', id="fullName" name='name.full', value=user.name ? user.name.full : '').validate
-					.input-field(class=validationErrors.email ? 'has-error' : null)
-						label(for="email") Email
-						input(type='email', id="email", name='email', value=user.email).validate
-					.input-field
-						label(for="phone") Phone
-						input(type='text', id="phone", name='phone', value=user.phone, placeholder='(optional)').validate
-					
-					p.grey-text: em only enter password if you want to change it
-					.input-field
-						label(for="password") Password
-						input(type='text', id="password", name='password').validate
-					if userType == 'operator'
-						.switch
-							label Viewer Only
-								input(type='checkbox', id='isViewerOnly', name='isViewerOnly', checked=user.isViewerOnly).validate
-								span.lever
-						br
-					.margin-top
-					if userType == 'customer'	
-						.input-field(class=validationErrors.name ? 'has-error' : null)
-							label(for="company") Company
-							input(type='text', id="company" name='company', value=user.company).validate
-						.input-field(class=validationErrors.name ? 'has-error' : null)
-							label(for="ABN") ABN
-							input(type='text', id="ABN" name='ABN', value=user.ABN).validate
-						.input-field(class=validationErrors.billingAddress ? 'has-error' : null)
-							label(for="billingAddress") Billing Address
-							textarea(name='billingAddress', id='billingAddress', rows=4).materialize-textarea= user.billingAddress
-						.input-field(class=validationErrors.shippingAddress ? 'has-error' : null)
-							label(for='shippingAddress') Shipping Address
-							textarea(name='shippingAddress', id='shippingAddress', rows=4).materialize-textarea= user.shippingAddress
-					.input-actions.margin-top
-						button(type='submit').btn Save
+						label(for="company") Company
+						input(type='text', id="company" name='company', value=item.company).validate
+					.input-field(class=validationErrors.name ? 'has-error' : null)
+						label(for="ABN") ABN
+						input(type='text', id="ABN" name='ABN', value=item.ABN).validate
+					.input-field(class=validationErrors.billingAddress ? 'has-error' : null)
+						label(for="billingAddress") Billing Address
+						textarea(name='billingAddress', id='billingAddress', rows=4).materialize-textarea= item.billingAddress
+					.input-field(class=validationErrors.shippingAddress ? 'has-error' : null)
+						label(for='shippingAddress') Shipping Address
+						textarea(name='shippingAddress', id='shippingAddress', rows=4).materialize-textarea= item.shippingAddress
+				.input-actions.margin-top
+					a(href="javascript:history.back()") Back 
+					button(type='submit').btn.right Save

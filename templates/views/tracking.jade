@@ -1,3 +1,33 @@
-h1 Tracking Your Job 
-	small has never been easier
-h2 Welcome to our shop
+extends ../layouts/publicface
+
+block content
+	.container: .row: .col.s12.m10
+		h2 Job Tracking System 
+		.section
+				if user
+					h4=  'Welcome ' + user.name.full 				
+
+			
+				p.grey-text.text-darken-3.lighten-3
+				| This page shows the latest update on your work order. Our staff try to keep this information up to date. If the status of your job is "Wait For Customer", please contact us.
+				
+			.card.blue-grey.darken-1
+				.card-content.white-text
+					span.card-title= 'Job Number ' + job.jobNumber
+					p
+					| Status
+					.chip(class=(job.status == 'IN PROGRESS' ? 'green white-text' : 'blue black-text' ))= job.status
+					if job.comments && job.comments.length
+						ul.margin-top.collection.with-header
+							li.collection-header
+								h4.grey-text Comments
+							each comment in job.comments
+								li.collection-item.avatar
+									i.material-icons.circle.green insert_chart
+									span.title.black-text= comment.text
+									p.grey-text=  comment.date
+				.card-action
+					a(href='/contact') Contact Us
+					a(href='/keystone/signout') Sign Out
+						
+						

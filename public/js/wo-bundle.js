@@ -34407,69 +34407,69 @@ module.exports = CommentBox;
 },{"react":164}],176:[function(require,module,exports){
 var React = require('react');
 var CustomerBox = React.createClass({
-	displayName: "CustomerBox",
+	displayName: 'CustomerBox',
 
 	render: function () {
 		var customer = this.props.data;
 		var displayName = this.customerName(customer);
 		var moreLink = !this.props.isCompact && customer && customer._id ? React.createElement(
-			"div",
-			{ className: "card-action" },
+			'div',
+			{ className: 'card-action' },
 			React.createElement(
-				"a",
-				{ onClick: this.stopPropagation, target: "_blank", href: '/customer/' + customer._id },
-				"Edit"
+				'a',
+				{ onClick: this.stopPropagation, href: '/customer/' + customer._id },
+				'Edit'
 			)
 		) : null;
 		var info = this.props.isCompact ? null : React.createElement(
-			"div",
-			{ className: "info" },
+			'div',
+			{ className: 'info' },
 			React.createElement(
-				"p",
+				'p',
 				null,
 				React.createElement(
-					"a",
+					'a',
 					{ href: 'tel:' + customer.phone },
-					" ",
+					' ',
 					customer.phone,
-					" "
+					' '
 				)
 			),
 			React.createElement(
-				"p",
+				'p',
 				null,
 				React.createElement(
-					"a",
+					'a',
 					{ href: 'mailto:' + customer.email },
-					" ",
+					' ',
 					customer.email,
-					" "
+					' '
 				)
 			),
 			React.createElement(
-				"p",
+				'p',
 				null,
 				customer.billingAddress
 			)
 		);
 		return React.createElement(
-			"div",
+			'div',
 			{ className: this.props.className, onClick: this.boxClicked },
 			React.createElement(
-				"div",
-				{ className: "card hoverable clickable grey lighten-4" },
+				'div',
+				{ className: 'card hoverable clickable grey lighten-4' },
 				React.createElement(
-					"div",
-					{ className: "card-content" },
+					'div',
+					{ className: 'card-content' },
 					React.createElement(
-						"span",
-						{ className: "card-title" },
+						'span',
+						{ className: 'card-title' },
 						React.createElement(
-							"i",
-							{ className: "material-icons" },
-							"account_circle"
+							'i',
+							{ className: 'material-icons' },
+							'account_circle'
 						),
-						"  ",
+						'  ',
 						displayName
 					),
 					info

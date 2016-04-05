@@ -8,7 +8,7 @@ exports = module.exports = function(req, res){
 	// Init locals 
 	locals.data = {};
 	
-	locals.user = req.body || {};
+	locals.item = req.body || {};
 	locals.validationErrors = {};
 	locals.submitted = false;
 	
@@ -18,7 +18,7 @@ exports = module.exports = function(req, res){
 				_id: req.params.customer})
 				.exec(function(err, result){
 					if (result && result.isCustomer)
-						locals.user = result;
+						locals.item = result;
 					else
 						req.flash("error", "Invalid Customer ID");
 					next(err);
@@ -34,7 +34,7 @@ exports = module.exports = function(req, res){
 				_id: req.params.operator})
 				.exec(function(err, result){
 					if (result && result.isOperator)
-						locals.user = result;
+						locals.item = result;
 					else
 						req.flash("error", "Invalid Operator ID");
 					next(err);
@@ -48,8 +48,8 @@ exports = module.exports = function(req, res){
 	view.on('post', function(next) {
 		var updater;
 		var redirectPath;
-		if (locals.user && locals.user._id){
-			updater = locals.user.getUpdateHandler(req);
+		if (locals.item && locals.item._id){
+			updater = locals.item.getUpdateHandler(req);
 		} else {
 			var newEntity = new User.model();
 			switch (req.body.action){
@@ -59,6 +59,7 @@ exports = module.exports = function(req, res){
 					
 				case 'operator':
 					newEntity.isOperator = true;
+					redirectPath = "/operators";
 					break;
 					
 			}
@@ -80,8 +81,8 @@ exports = module.exports = function(req, res){
 				locals.validationErrors = err.errors;
 			} else {
 				locals.submitted = true;
-				req.flash('success', 'Operator saved!');
-				res.redirect("/operators");
+				req.flash('success', req.body.action + ' saved!');
+				if (redirectPath) res.redirect(redirectPath);
 			}
 			next();
 		});

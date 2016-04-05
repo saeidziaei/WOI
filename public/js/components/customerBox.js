@@ -5,7 +5,7 @@ var CustomerBox = React.createClass({
 		var displayName = this.customerName(customer);
 		var moreLink = !this.props.isCompact && customer && customer._id ?
 			<div className="card-action">
-					<a onClick={this.stopPropagation} target="_blank" href={'/customer/' + customer._id}>Edit</a>
+					<a onClick={this.stopPropagation}  href={'/customer/' + customer._id}>Edit</a>
 			</div> :
 			null;
 		var info = this.props.isCompact ? null :
