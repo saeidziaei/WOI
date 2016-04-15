@@ -35623,11 +35623,7 @@ var WO = React.createClass({
 		return { first: first, last: last };
 	},
 	renderActions: function (w) {
-		var btnDevStartOver = React.createElement(
-			'div',
-			{ className: 'btn orange lighten-1', onClick: this.changeStatus.bind(this, woStatus.QUOTE) },
-			'Start Over From Quote'
-		);
+		var btnDevStartOver = null; // <div className='btn orange lighten-1' onClick={this.changeStatus.bind(this, woStatus.QUOTE)}>Start Over From Quote</div>;
 
 		var btnCreate = !w.jobNumber ? React.createElement(
 			'div',
