@@ -1,0 +1,38 @@
+//extends ../layout/auth
+extends ../layouts/default
+
+block content
+	.container
+		if user
+			p.lead Hi #{user.name.first},
+			p.lead You're already signed in.
+			.toolbar
+				if user.isAdmin
+					a(href='/keystone').btn.btn-primary Open Keystone
+				a(href='/keystone/signout').btn.btn-cancel Sign out
+		
+		else
+			.row.margin-top: .col.s12.m6.push-m3
+				.card.center.signin-box
+					.card-panel.red.lighten-1.center
+						span.white-text Sign In to KIJA
+					.card-content.row
+						form(method="post", novalidate).col.s12 
+							input(type='hidden', name=csrf_token_key, value=csrf_token_value)
+							.row: .col.s11: .input-field
+								i.material-icons.prefix account_circle
+								label(for='email') Email
+								input(type='email', name='email', id='email', value=submitted.email)
+							.row: .col.s11: .input-field
+								i.material-icons.prefix lock
+								label(for='password') Password
+								input(type='password', name='password', id='password')
+							.card-action: button.btn.warm-blue(type='submit') Sign In
+			
+				
+block js
+	//- Only focus the field after the shake animation is complete
+	if messages && messages.error.length
+		script setTimeout(function() { try { document.getElementById('email').focus(); } catch(e) {}; }, 800);
+	else
+		script try { document.getElementById('email').focus(); } catch(e) {};

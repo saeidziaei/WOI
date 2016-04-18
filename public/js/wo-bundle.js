@@ -35498,7 +35498,7 @@ var WO = React.createClass({
 				this.showError("What work needs to be done?");
 				return;
 			}
-			var dbCustomer = w.customer;
+			var dbCustomer = w.customer || {};
 			var self = this;
 			async.series([function (cb) {
 				if (self.state.createNewCustomer) {
@@ -35511,8 +35511,10 @@ var WO = React.createClass({
 					cb();
 				}
 			}, function () {
+				console.log('try to save wo... with customer ' + dbCustomer._id);
 				w.customer = dbCustomer._id;
 				self.saveWorkOrder(w, function (result) {
+					console.log('saved with job number ' + result.workorder.jobNumber);
 					var jn = result.workorder.jobNumber;
 					swal({
 						title: "Job Number " + jn,

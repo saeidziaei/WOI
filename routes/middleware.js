@@ -9,7 +9,7 @@
  */
 
 var _ = require('underscore');
-
+const SIGIN_URL = '/signin'; //'/keystone/signin'
 
 /**
 	Initialises the standard view locals
@@ -70,7 +70,7 @@ exports.requireUser = function(req, res, next) {
 	
 	if (!req.user) {
 		req.flash('error', 'Please sign in to access this page.');
-		res.redirect('/keystone/signin');
+		res.redirect(SIGIN_URL);
 	} else {
 		next();
 	}
@@ -81,7 +81,7 @@ exports.requireStaff = function(req, res, next) {
 	var user = req.user;
 	if (!user) {
 		req.flash('error', 'Please sign in to access this page.');
-		res.redirect('/keystone/signin');
+		res.redirect(SIGIN_URL);
 	} else {
 		if (user.isManager || user.isOperator){
 			next();

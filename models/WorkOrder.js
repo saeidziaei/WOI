@@ -24,36 +24,38 @@ WorkOrder.schema.pre('save', function(next){
     var doc = this;
 	if (!doc.jobNumber){
 		var keyService = keystone.list('KeyService').model;
-		keyService.findOneAndUpdate(
-			{keyName: 'nextJobNumber'}, 
-			{$inc: { seq: 1} }, 
-			function(error, result){
-				if (error) next(error);
-				if (!result){
-					var KeyService = keystone.list('KeyService');
-					var newKey = new KeyService.model({
+		keyService.findOne({keyName: 'nextJobNumber'}, function(err, result){
+			// JobNumber is in this format YYxxxx in which YY is the last 2 digits of year
+			if (err) next(err);
+			var nextJobNumber;
+			var year = new Date().getFullYear().toString().substr(2, 2);
+
+			if (result && result.seq.toString().substr(0, 2) == year){
+				// still in current year
+				nextJobNumber = result.seq + 1;
+			} else {
+				// initial step as well as when the year changes
+				nextJobNumber = Number(year) * 1000 + 1;
+				// initial step only
+				if (!result) {
+					result = new KeyService.model({
 							keyName: 'nextJobNumber',
-							seq: 1});
-							
-					newKey.save(function(err){
-						if (err) next(err);
-						doc.jobNumber = 1;
-						next();
-					})
-				} else {
-					doc.jobNumber = result.seq;
-    				next();
+							seq: nextJobNumber});
 				}
 			}
-		);
+			result.seq = nextJobNumber;
+			result.save(function(err){
+				if (err) next(err);
+				doc.jobNumber = nextJobNumber;
+				next();
+			});
+		});
+		
 	} else {
 		next();
 	}		
 
 
-	// keyService.getNextJobNumber(function(jn){
-	// 	doc.jobNumber = jn;
-	// })
 });
 
 

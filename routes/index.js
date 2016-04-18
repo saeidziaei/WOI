@@ -37,6 +37,7 @@ exports = module.exports = function(app) {
 	
 	// Views
 	app.get('/', routes.views.index);
+	app.all('/signin', routes.views.signin); // override keystone signin
 	app.get('/blog/:category?', routes.views.blog);
 	app.get('/blog/post/:post', routes.views.post);
 	app.get('/gallery', routes.views.gallery);
@@ -55,7 +56,7 @@ exports = module.exports = function(app) {
 		
 	// app.get('/api/customer/list', keystone.initAPI, routes.api.posts.list);
 	app.get('/api/customer/search', keystone.middleware.api, middleware.requireUser, routes.api.user.searchCustomer);
-	app.post('/api/customer/create', keystone.middleware.api, middleware.requireUser, routes.api.user.createCustomer);
+	app.post('/api/customer/create', keystone.middleware.api, middleware.requireStaff, routes.api.user.createCustomer);
 	
 	app.get('/api/workorder/search', keystone.middleware.api, middleware.requireUser, routes.api.workorder.search);
 	
